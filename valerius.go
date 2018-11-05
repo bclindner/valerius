@@ -12,7 +12,7 @@ import (
 
 func init() {
 	// setup logging
-	logfile, err := os.OpenFile("valerius.log", os.O_WRONLY | os.O_CREATE, 0755)
+	logfile, err := os.OpenFile("valerius.log", os.O_WRONLY | os.O_CREATE, 0644)
 	if err != nil { log.Fatal("Unable to establish logging: ",err) }
 	log.SetOutput(io.MultiWriter(os.Stdout, logfile))
 	log.SetFormatter(&log.JSONFormatter{})
@@ -25,7 +25,7 @@ type BotConfiguration struct {
 func initBot() (bot *discordgo.Session, err error) {
 	// setup logrus config
 	// load bot config file
-	configFile, err := ioutil.ReadFile("config.json")
+	configFile, err := ioutil.ReadFile("valerius.json")
 	if err != nil { return }
 	// parse bot config file
 	var config BotConfiguration
@@ -49,6 +49,7 @@ func main() {
 	handler := NewMessageHandler(bot, user)
 	// add handler commands
 	handler.Add(PingPongCommand{
+		Name: "example PingPongCommand",
 		PingString: "ping",
 		PongString: "pong",
 	})
