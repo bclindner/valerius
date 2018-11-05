@@ -1,6 +1,7 @@
 package main
 
 import (
+	"io"
 	"io/ioutil" // for opening config file
 	"encoding/json" // for parsing config file
 	"github.com/bwmarrin/discordgo" // for running the bot
@@ -9,11 +10,20 @@ import (
 	"os/signal"
 )
 
+func init() {
+	// setup logging
+	logfile, err := os.OpenFile("valerius.log", os.O_WRONLY | os.O_CREATE, 0755)
+	if err != nil { log.Fatal("Unable to establish logging: ",err) }
+	log.SetOutput(io.MultiWriter(os.Stdout, logfile))
+	log.SetFormatter(&log.JSONFormatter{})
+}
+
 type BotConfiguration struct {
 	BotToken string `json:"botToken"`
 }
 
 func initBot() (bot *discordgo.Session, err error) {
+	// setup logrus config
 	// load bot config file
 	configFile, err := ioutil.ReadFile("config.json")
 	if err != nil { return }
@@ -47,5 +57,6 @@ func main() {
 	signal.Notify(sig, os.Interrupt, os.Kill)
 	<-sig
 	// close the bot websocket and exit the program
+	log.Info("Interrupt signal sent, shutting down...")
 	bot.Close()
 }
