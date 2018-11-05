@@ -23,15 +23,16 @@ func NewMessageHandler(bot *discordgo.Session, user *discordgo.User) *MessageHan
 	return &handler
 }
 
-func (c *MessageHandler) Handle(bot *discordgo.Session, msg *discordgo.MessageCreate) {
+// Handle a Discord message.
+func (c *MessageHandler) Handle(bot *discordgo.Session, evt *discordgo.MessageCreate) {
 	// Run preliminary tests: is the user sending the message a bot?
-	if !msg.Author.Bot {
+	if !evt.Message.Author.Bot {
 		// For each command:
 		for _, cmd := range c.Commands {
 			// If the test checks out,
-			if cmd.Test(bot, msg) {
+			if cmd.Test(bot, evt) {
 				// run the command
-				cmd.Run(bot, msg)
+				cmd.Run(bot, evt)
 			}
 		}
 	}
