@@ -32,8 +32,9 @@ func init() {
 		if err != nil { log.Fatal("Unable to establish logging: ",err) }
 		// set up the output and formatter
 		log.SetOutput(io.MultiWriter(os.Stdout, logfile))
+		log.SetFormatter(&log.JSONFormatter{})
 	}
-	log.SetFormatter(&log.JSONFormatter{})
+	
 	// setup logrus config
 	// load bot config file
 	configFile, err := ioutil.ReadFile(*configPath)

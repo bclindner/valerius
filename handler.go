@@ -16,6 +16,10 @@ type MessageHandler struct {
 	UserID string
 }
 
+type Handler interface {
+	Handle(bot *discordgo.Session, evt *discordgo.MessageCreate)
+}
+
 // Create a new handler and bind it to a Session.
 func NewMessageHandler(bot *discordgo.Session, user *discordgo.User) *MessageHandler {
 	handler := MessageHandler{
@@ -38,6 +42,7 @@ func (c *MessageHandler) Handle(bot *discordgo.Session, evt *discordgo.MessageCr
 					// log it,
 					author := *evt.Message.Author
 					log.WithFields(log.Fields{
+						"text": evt.Message.Content,
 						"command": cmd.Name(),
 						"userID": author.ID,
 						"username": author.Username + "#" + author.Discriminator,
