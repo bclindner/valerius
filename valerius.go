@@ -12,7 +12,7 @@ import (
 
 func init() {
 	// setup logging file
-	logfile, err := os.OpenFile("valerius.log", os.O_WRONLY | os.O_CREATE, 0644)
+	logfile, err := os.OpenFile("valerius.log", os.O_WRONLY | os.O_CREATE | os.O_APPEND, 0644)
 	if err != nil { log.Fatal("Unable to establish logging: ",err) }
 	// set up the output and formatter
 	log.SetOutput(io.MultiWriter(os.Stdout, logfile))
@@ -52,10 +52,8 @@ func main() {
 	// instantiate and register the handler
 	handler := NewMessageHandler(bot, user)
 	// add handler commands
-	handler.Add(PingPongCommand{
-		Name: "example PingPongCommand",
-		PingString: "ping",
-		PongString: "pong",
+	handler.Add(HelloCommand{
+		Name: "Hello World",
 	})
 	// wait for OS interrupt (ctrl-c or a kill or something)
 	sig := make(chan os.Signal, 1)
