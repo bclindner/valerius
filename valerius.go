@@ -52,8 +52,10 @@ func main() {
 	// instantiate and register the handler
 	handler := NewMessageHandler(bot, user)
 	// add handler commands
-	handler.Add(HelloCommand{
-		Name: "Hello World",
+	handler.Add(HelloCommand{})
+	handler.Add(PingPongCommand{
+		PingString: "ping",
+		PongString: "pong",
 	})
 	// wait for OS interrupt (ctrl-c or a kill or something)
 	sig := make(chan os.Signal, 1)

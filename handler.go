@@ -2,9 +2,11 @@ package main
 
 import (
 	"github.com/bwmarrin/discordgo" // for running the bot
+	log "github.com/sirupsen/logrus" // logging suite
 )
 
 type Command interface {
+	Name() string
 	Test(*discordgo.Session, *discordgo.MessageCreate) bool
 	Run(*discordgo.Session, *discordgo.MessageCreate)
 }
@@ -31,6 +33,12 @@ func (c *MessageHandler) Handle(bot *discordgo.Session, evt *discordgo.MessageCr
 		for _, cmd := range c.Commands {
 			// If the test checks out,
 			if cmd.Test(bot, evt) {
+				author := *evt.Message.Author
+				log.WithFields(log.Fields{
+					"command": cmd.Name(),
+					"userID": author.ID,
+					"username": author.Username + "#" + author.Discriminator,
+				}).Info("Command fired")
 				// run the command
 				cmd.Run(bot, evt)
 			}
