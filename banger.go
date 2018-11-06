@@ -8,6 +8,7 @@ import (
 
 type BangerAlertCommand struct {
 	Command
+	RNG *rand.Rand
 	BangerMessage string
 	Bangers []string
 	DanceEnabled bool
@@ -16,7 +17,7 @@ type BangerAlertCommand struct {
 
 func NewBangerAlertCommand(bangers []string, gifs []string) BangerAlertCommand {
 	// initialize RNG if not done already
-	rand.Seed(253489732658)
+	rng := rand.New(rand.NewSource(253489732658))
 	// Check if bangers are available, if not, panic (for now)
 	if len(bangers) == 0 {
 		log.Fatal("No bangers specified for BangerAlertCommand!")
@@ -25,6 +26,7 @@ func NewBangerAlertCommand(bangers []string, gifs []string) BangerAlertCommand {
 	if len(gifs) > 0 {
 		// return the object DanceGifs and enable them
 		return BangerAlertCommand{
+			RNG: rng,
 			Bangers: bangers,
 			DanceEnabled: true,
 			DanceGifs: gifs,
@@ -32,6 +34,7 @@ func NewBangerAlertCommand(bangers []string, gifs []string) BangerAlertCommand {
 		}
 	} else {
 		return BangerAlertCommand{
+			RNG: rng,
 			Bangers: bangers,
 			DanceEnabled: false,
 			BangerMessage: "🚨OH🚨SHIT🚨IT'S🚨A🚨BANGER🚨 ",
@@ -53,7 +56,7 @@ func (b BangerAlertCommand) Test(bot *discordgo.Session, evt *discordgo.MessageC
 
 func (b BangerAlertCommand) Run(bot *discordgo.Session, evt *discordgo.MessageCreate) {
 	if b.DanceEnabled {
-		bot.ChannelMessageSend(evt.Message.ChannelID, b.BangerMessage+b.DanceGifs[rand.Intn(len(b.DanceGifs))])
+		bot.ChannelMessageSend(evt.Message.ChannelID, b.BangerMessage+b.DanceGifs[b.RNG.Intn(len(b.DanceGifs))])
 	} else {
 		bot.ChannelMessageSend(evt.Message.ChannelID, b.BangerMessage)
 
