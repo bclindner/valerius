@@ -68,7 +68,11 @@ func main() {
 		PongString: "pong",
 	})
 	handler.Add(NewXKCDCommand())
-	handler.Add(NewBangerAlertCommand(config.Bangers, config.DanceGifs))
+	if len(config.Bangers) == 0 {
+		log.Warn("No bangers in config file; not adding banger alert command")
+	} else {
+		handler.Add(NewBangerAlertCommand(config.Bangers, config.DanceGifs))
+	}
 	// open the bot to be used
 	bot.Open()
 	// wait for OS interrupt (ctrl-c or a kill or something)
