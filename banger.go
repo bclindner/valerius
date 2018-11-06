@@ -18,28 +18,19 @@ type BangerAlertCommand struct {
 func NewBangerAlertCommand(bangers []string, gifs []string) BangerAlertCommand {
 	// initialize RNG if not done already
 	rng := rand.New(rand.NewSource(253489732658))
+	bmessage := "🚨OH🚨SHIT🚨IT'S🚨A🚨BANGER🚨 "
 	// Check if bangers are available, if not, panic (for now)
 	if len(bangers) == 0 {
-		log.Fatal("No bangers specified for BangerAlertCommand!")
+		log.Fatal("No bangers found")
 	}
-	// Check if dance gifs should be enabled
-	if len(gifs) > 0 {
-		// return the object DanceGifs and enable them
-		return BangerAlertCommand{
+	newCommand := BangerAlertCommand{
 			RNG: rng,
 			Bangers: bangers,
-			DanceEnabled: true,
+			DanceEnabled: len(gifs) != 0,
 			DanceGifs: gifs,
-			BangerMessage: "🚨OH🚨SHIT🚨IT'S🚨A🚨BANGER🚨 ",
+			BangerMessage: bmessage,
 		}
-	} else {
-		return BangerAlertCommand{
-			RNG: rng,
-			Bangers: bangers,
-			DanceEnabled: false,
-			BangerMessage: "🚨OH🚨SHIT🚨IT'S🚨A🚨BANGER🚨 ",
-		}
-	}
+	return newCommand
 }
 
 func (b BangerAlertCommand) Name() string {
