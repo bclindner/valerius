@@ -1,21 +1,28 @@
 package main
 
 import (
-	"io"
+	"io" // for io.MultiWriter (logrus multi-output)
 	"io/ioutil" // for opening config file
 	"encoding/json" // for parsing config file
 	"github.com/bwmarrin/discordgo" // for running the bot
 	log "github.com/sirupsen/logrus" // logging suite
-	"os"
-	"os/signal"
+	"os" // for opening logging file
+	"os/signal" // for interrupt signal information
+	"flag" // for parsing args at runtime
 )
 
 func init() {
-	// setup logging file
-	logfile, err := os.OpenFile("valerius.log", os.O_WRONLY | os.O_CREATE | os.O_APPEND, 0644)
-	if err != nil { log.Fatal("Unable to establish logging: ",err) }
-	// set up the output and formatter
-	log.SetOutput(io.MultiWriter(os.Stdout, logfile))
+	// set up flags
+	logPath := flag.String("log", "", "Path to the logfile, if used.")
+	// parse flags
+	flag.Parse()
+	// log to a file as well as stdout if the -log flag was set
+	if *logPath != "" {
+		logfile, err := os.OpenFile(*logPath, os.O_WRONLY | os.O_CREATE | os.O_APPEND, 0644)
+		if err != nil { log.Fatal("Unable to establish logging: ",err) }
+		// set up the output and formatter
+		log.SetOutput(io.MultiWriter(os.Stdout, logfile))
+	}
 	log.SetFormatter(&log.JSONFormatter{})
 }
 
