@@ -8,6 +8,7 @@ import (
 
 type BangerAlertCommand struct {
 	Command
+	BangerMessage string
 	Bangers []string
 	DanceEnabled bool
 	DanceGifs []string
@@ -27,11 +28,13 @@ func NewBangerAlertCommand(bangers []string, gifs []string) BangerAlertCommand {
 			Bangers: bangers,
 			DanceEnabled: true,
 			DanceGifs: gifs,
+			BangerMessage: "🚨OH🚨SHIT🚨IT'S🚨A🚨BANGER🚨 ",
 		}
 	} else {
 		return BangerAlertCommand{
 			Bangers: bangers,
 			DanceEnabled: false,
+			BangerMessage: "🚨OH🚨SHIT🚨IT'S🚨A🚨BANGER🚨 ",
 		}
 	}
 }
@@ -50,9 +53,9 @@ func (b BangerAlertCommand) Test(bot *discordgo.Session, evt *discordgo.MessageC
 
 func (b BangerAlertCommand) Run(bot *discordgo.Session, evt *discordgo.MessageCreate) {
 	if b.DanceEnabled {
-		bot.ChannelMessageSend(evt.Message.ChannelID, "OH SHIT IT'S A BANGER "+b.DanceGifs[rand.Intn(len(b.DanceGifs))])
+		bot.ChannelMessageSend(evt.Message.ChannelID, b.BangerMessage+b.DanceGifs[rand.Intn(len(b.DanceGifs))])
 	} else {
-		bot.ChannelMessageSend(evt.Message.ChannelID, "OH SHIT IT'S A BANGER!")
+		bot.ChannelMessageSend(evt.Message.ChannelID, b.BangerMessage)
 
 	}
 }
