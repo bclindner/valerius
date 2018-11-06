@@ -37,8 +37,7 @@ func init() {
 	configFile, err := ioutil.ReadFile(*configPath)
 	if err != nil { log.Fatal("Unable to read config file: ",err) }
 	// parse bot config file
-	var config BotConfiguration
-	err = json.Unmarshal(configFile, *config)
+	err = json.Unmarshal(configFile, &config)
 	if err != nil { log.Fatal("Unable to read config file: ",err) }
 }
 
