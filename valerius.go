@@ -46,7 +46,6 @@ func initBot() (bot *discordgo.Session, user *discordgo.User, err error) {
 	log.Info("Bot initializing")
 	// initialize the bot
 	bot, err = discordgo.New("Bot "+config.BotToken)
-	bot.Open()
 	// get the current bot user
 	user, err = bot.User("@me")
 	if err != nil { return }
@@ -66,6 +65,9 @@ func main() {
 		PingString: "ping",
 		PongString: "pong",
 	})
+	handler.Add(NewXKCDCommand())
+	// open the bot to be used
+	bot.Open()
 	// wait for OS interrupt (ctrl-c or a kill or something)
 	sig := make(chan os.Signal, 1)
 	signal.Notify(sig, os.Interrupt, os.Kill)
