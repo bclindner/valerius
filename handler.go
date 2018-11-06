@@ -33,13 +33,14 @@ func (c *MessageHandler) Handle(bot *discordgo.Session, evt *discordgo.MessageCr
 		for _, cmd := range c.Commands {
 			// If the test checks out,
 			if cmd.Test(bot, evt) {
+				// log it,
 				author := *evt.Message.Author
 				log.WithFields(log.Fields{
 					"command": cmd.Name(),
 					"userID": author.ID,
 					"username": author.Username + "#" + author.Discriminator,
 				}).Info("Command fired")
-				// run the command
+				// and run the command
 				cmd.Run(bot, evt)
 			}
 		}

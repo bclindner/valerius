@@ -14,6 +14,8 @@ import (
 // Structure for the bot configuration JSON file.
 type BotConfiguration struct {
 	BotToken string `json:"botToken"`
+	Bangers []string `json:"bangers"`
+	DanceGifs []string `json:"danceGifs"`
 }
 
 var config BotConfiguration
@@ -66,6 +68,7 @@ func main() {
 		PongString: "pong",
 	})
 	handler.Add(NewXKCDCommand())
+	handler.Add(NewBangerAlertCommand(config.Bangers, config.DanceGifs))
 	// open the bot to be used
 	bot.Open()
 	// wait for OS interrupt (ctrl-c or a kill or something)
@@ -75,4 +78,5 @@ func main() {
 	// close the bot websocket and exit the program
 	log.Info("Interrupt signal sent, shutting down...")
 	bot.Close()
+	log.Info("Bot closed down successfully. Goodbye")
 }
