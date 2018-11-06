@@ -11,9 +11,17 @@ import (
 	"flag" // for parsing args at runtime
 )
 
+// Structure for the bot configuration JSON file.
+type BotConfiguration struct {
+	BotToken string `json:"botToken"`
+}
+
+var config BotConfiguration
+
 func init() {
 	// set up flags
 	logPath := flag.String("log", "", "Path to the logfile, if used.")
+	configPath := flag.String("conf", "valerius.json", "Path to the config file.")
 	// parse flags
 	flag.Parse()
 	// log to a file as well as stdout if the -log flag was set
@@ -24,24 +32,19 @@ func init() {
 		log.SetOutput(io.MultiWriter(os.Stdout, logfile))
 	}
 	log.SetFormatter(&log.JSONFormatter{})
-}
-
-// Structure for the bot configuration JSON file.
-type BotConfiguration struct {
-	BotToken string `json:"botToken"`
+	// setup logrus config
+	// load bot config file
+	configFile, err := ioutil.ReadFile(*configPath)
+	if err != nil { log.Fatal("Unable to read config file: ",err) }
+	// parse bot config file
+	var config BotConfiguration
+	err = json.Unmarshal(configFile, *config)
+	if err != nil { log.Fatal("Unable to read config file: ",err) }
 }
 
 // Initialize the bot.
 func initBot() (bot *discordgo.Session, user *discordgo.User, err error) {
 	log.Info("Bot initializing")
-	// setup logrus config
-	// load bot config file
-	configFile, err := ioutil.ReadFile("valerius.json")
-	if err != nil { return }
-	// parse bot config file
-	var config BotConfiguration
-	err = json.Unmarshal(configFile, &config)
-	if err != nil { return }
 	// initialize the bot
 	bot, err = discordgo.New("Bot "+config.BotToken)
 	bot.Open()
