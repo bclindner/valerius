@@ -72,7 +72,8 @@ func main() {
 	if len(config.Bangers) == 0 {
 		log.Warn("No bangers in config file; not adding banger alert command")
 	} else {
-		handler.Add(NewBangerAlertCommand(config.Bangers, config.DanceGifs))
+		handler.Add(NewBangerAlertCommand(&config.Bangers, &config.DanceGifs))
+		handler.Add(NewBangerFinderCommand(&config.Bangers))
 	}
 	// open the bot to be used
 	bot.Open()
