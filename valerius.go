@@ -63,11 +63,8 @@ func main() {
 	// instantiate and register the handler
 	handler := NewMessageHandler(bot, user)
 	// add handler commands
-	handler.Add(HelloCommand{})
-	handler.Add(PingPongCommand{
-		PingString: "ping",
-		PongString: "pong",
-	})
+	handler.Add(NewHelloCommand())
+	handler.Add(NewPingPongCommand("ping", "pong"))
 	handler.Add(NewXKCDCommand())
 	if len(config.Bangers) == 0 {
 		log.Warn("No bangers in config file; not adding banger alert command")

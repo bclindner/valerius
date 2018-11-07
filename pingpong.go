@@ -15,6 +15,13 @@ func (p PingPongCommand) Name() string {
 	return "PingPong command"
 }
 
+func NewPingPongCommand(ping string, pong string) PingPongCommand {
+	return PingPongCommand{
+		PingString: ping,
+		PongString: pong,
+	}
+}
+
 func (p PingPongCommand) Test(bot *discordgo.Session, evt *discordgo.MessageCreate) bool {
 	return strings.Contains(evt.Message.Content, p.PingString)
 }

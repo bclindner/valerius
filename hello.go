@@ -11,6 +11,11 @@ type HelloCommand struct {
 func (p HelloCommand) Name() string {
 	return "Hello World"
 }
+
+func NewHelloCommand() HelloCommand {
+	return HelloCommand{}
+}
+
 func (h HelloCommand) Test(bot *discordgo.Session, evt *discordgo.MessageCreate) bool {
 	return evt.Message.Content == "!hello"
 }
