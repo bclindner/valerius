@@ -8,6 +8,7 @@ import (
 	"net/http"
 	"regexp"
 	"strconv"
+	"errors"
 )
 
 // The XKCDCommand base structure. Takes a Regexp to test the command.
@@ -50,7 +51,7 @@ func (x XKCDCommand) Test(bot *discordgo.Session, evt *discordgo.MessageCreate) 
 	return x.Regexp.MatchString(evt.Message.Content)
 }
 
-func (x XKCDCommand) Run(bot *discordgo.Session, evt *discordgo.MessageCreate) {
+func (x XKCDCommand) Run(bot *discordgo.Session, evt *discordgo.MessageCreate) (err error) {
 	// Get the comic number from the regex group matches
 	comicNumber := x.Regexp.FindStringSubmatch(evt.Message.Content)[1]
 	// Get the endpoint necessary
@@ -63,13 +64,9 @@ func (x XKCDCommand) Run(bot *discordgo.Session, evt *discordgo.MessageCreate) {
 	// Run a GET request to the endpoint
 	resp, err := http.Get(endpoint)
 	// Error out if it failed or did not return 200
-	if err != nil || resp.StatusCode != 200 {
-		log.WithFields(log.Fields{
-			"name":       x.Name(),
-			"statusCode": resp.StatusCode,
-			"error":      err,
-		}).Error("Command failed")
-		return
+	if err != nil { return }
+	if resp.StatusCode != 200 {
+		return errors.New("Error hitting XKCD API: response code not OK ("+strconv.Itoa(resp.StatusCode)+")")
 	}
 	// Read the body to []bytes
 	data, err := ioutil.ReadAll(resp.Body)
@@ -80,20 +77,14 @@ func (x XKCDCommand) Run(bot *discordgo.Session, evt *discordgo.MessageCreate) {
 		}).Error("Command failed")
 		return
 	}
-	// Close the body (it is no longer necessary
+	// Close the body (it is no longer necessary)
 	resp.Body.Close()
 	// Instantiate an XKCDComic object and map the JSON to the object
 	comic := XKCDComic{}
 	err = json.Unmarshal(data, &comic)
-	if err != nil {
-		log.WithFields(log.Fields{
-			"name":  x.Name(),
-			"error": err,
-		}).Error("Command failed")
-		return
-	}
+	if err != nil { return }
 	// Send the message as an embed
-	bot.ChannelMessageSendEmbed(evt.Message.ChannelID, &discordgo.MessageEmbed{
+	_, err = bot.ChannelMessageSendEmbed(evt.Message.ChannelID, &discordgo.MessageEmbed{
 		URL:         "https://xkcd.com/" + comicNumber,
 		Title:       "XKCD " + strconv.Itoa(comic.Number) + ": " + comic.SafeTitle,
 		Description: comic.Alt,
@@ -101,4 +92,5 @@ func (x XKCDCommand) Run(bot *discordgo.Session, evt *discordgo.MessageCreate) {
 			URL: comic.Image,
 		},
 	})
+	return
 }

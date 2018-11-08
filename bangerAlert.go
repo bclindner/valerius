@@ -60,11 +60,12 @@ func (b BangerAlertCommand) Test(bot *discordgo.Session, evt *discordgo.MessageC
 }
 
 // Posts the BangerMessage, plus a gif link, if the dance is enabled.
-func (b BangerAlertCommand) Run(bot *discordgo.Session, evt *discordgo.MessageCreate) {
+func (b BangerAlertCommand) Run(bot *discordgo.Session, evt *discordgo.MessageCreate) (err error) {
 	if b.DanceEnabled {
 		i := b.RNG.Intn(len(*b.DanceGifs))
-		bot.ChannelMessageSend(evt.Message.ChannelID, b.BangerMessage+(*b.DanceGifs)[i])
+		_, err = bot.ChannelMessageSend(evt.Message.ChannelID, b.BangerMessage+(*b.DanceGifs)[i])
 	} else {
-		bot.ChannelMessageSend(evt.Message.ChannelID, b.BangerMessage)
+		_, err = bot.ChannelMessageSend(evt.Message.ChannelID, b.BangerMessage)
 	}
+	return
 }

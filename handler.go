@@ -14,7 +14,8 @@ type Command interface {
 	Test(*discordgo.Session, *discordgo.MessageCreate) bool
 	// Runs the function. This can theoretically do anything, but is most
 	// commonly used to reply to or otherwise process a message.
-	Run(*discordgo.Session, *discordgo.MessageCreate)
+	// Returns an error that the handler can log.
+	Run(*discordgo.Session, *discordgo.MessageCreate) error
 }
 
 type BaseCommand struct {
@@ -67,7 +68,16 @@ func (c *MessageHandler) Handle(bot *discordgo.Session, evt *discordgo.MessageCr
 						"username": author.Username + "#" + author.Discriminator,
 					}).Info("Command fired")
 					// and run the command
-					cmd.Run(bot, evt)
+					err := cmd.Run(bot, evt)
+					if err != nil {
+						log.WithFields(log.Fields{
+							"text":     evt.Message.Content,
+							"command":  cmd.Name(),
+							"userID":   author.ID,
+							"username": author.Username + "#" + author.Discriminator,
+							"error": err,
+						}).Error("Command failed")
+					}
 				}
 			}(cmd)
 		}

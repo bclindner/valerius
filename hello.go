@@ -22,6 +22,7 @@ func (h HelloCommand) Test(bot *discordgo.Session, evt *discordgo.MessageCreate)
 	return evt.Message.Content == "!hello"
 }
 
-func (h HelloCommand) Run(bot *discordgo.Session, evt *discordgo.MessageCreate) {
-	bot.ChannelMessageSend(evt.Message.ChannelID, "Hello, world!")
+func (h HelloCommand) Run(bot *discordgo.Session, evt *discordgo.MessageCreate) (err error) {
+	_, err = bot.ChannelMessageSend(evt.Message.ChannelID, "Hello, world!")
+	return
 }

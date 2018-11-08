@@ -57,9 +57,7 @@ func initBot() (bot *discordgo.Session, user *discordgo.User, err error) {
 	bot, err = discordgo.New("Bot " + config.BotToken)
 	// get the current bot user
 	user, err = bot.User("@me")
-	if err != nil {
-		return
-	}
+	if err != nil { return }
 	log.Info("Bot logged in as ", user.Username, "#", user.Discriminator)
 	return
 }

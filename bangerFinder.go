@@ -39,7 +39,8 @@ func (b BangerFinderCommand) Test(bot *discordgo.Session, evt *discordgo.Message
 }
 
 // Posts a random banger from the Bangers list.
-func (b BangerFinderCommand) Run(bot *discordgo.Session, evt *discordgo.MessageCreate) {
+func (b BangerFinderCommand) Run(bot *discordgo.Session, evt *discordgo.MessageCreate) (err error) {
 	i := b.RNG.Intn(len(*b.Bangers))
-	bot.ChannelMessageSend(evt.Message.ChannelID, (*b.Bangers)[i])
+	_, err = bot.ChannelMessageSend(evt.Message.ChannelID, (*b.Bangers)[i])
+	return
 }
