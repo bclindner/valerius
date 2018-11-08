@@ -4,10 +4,13 @@ import (
 	"github.com/bwmarrin/discordgo" // for running the bot
 )
 
+// A simple command that just returns "Hello, world!"
+// Essentially just an example command for the CommandHandler.
 type HelloCommand struct {
 	Command
 }
 
+// 
 func (p HelloCommand) Name() string {
 	return "Hello World"
 }

@@ -5,31 +5,42 @@ import (
 	log "github.com/sirupsen/logrus" // logging suite
 )
 
+// Interface for commands that can be handled by the MessageHandler.
 type Command interface {
-	Name() string
+	// Returns a human-readable name for the function, for logging purposes.
+	PrettyName() string
+	// Command test. Whenever a message is sent, this test is run.
+	// If it passes, the handler calls the Run() method.
 	Test(*discordgo.Session, *discordgo.MessageCreate) bool
+	// Runs the function. This can theoretically do anything, but is most
+	// commonly used to reply to or otherwise process a message.
 	Run(*discordgo.Session, *discordgo.MessageCreate)
 }
 
+// Struct for the bot message handler. Currently this just contains a list of commands
+// Should extend the Handler interface.
 type MessageHandler struct {
+	Handler
 	Commands []Command
-	UserID   string
 }
 
+// Interface for the bot message handler.
+// Has Handle and Add functions that handle commands and add new ones.
 type Handler interface {
-	Handle(bot *discordgo.Session, evt *discordgo.MessageCreate)
+	Handle(*discordgo.Session, *discordgo.MessageCreate)
+	Add(...Command)
 }
 
 // Create a new handler and bind it to a Session.
 func NewMessageHandler(bot *discordgo.Session, user *discordgo.User) *MessageHandler {
-	handler := MessageHandler{
-		UserID: user.ID,
-	}
+	handler := MessageHandler{}
 	bot.AddHandler(handler.Handle)
 	return &handler
 }
 
-// Handle a Discord message.
+// Handle a Discord message. This just runs the Test() function of each command,
+// and if a command's test passes, the handler calls its Run() function, logging
+// the action as well.
 func (c *MessageHandler) Handle(bot *discordgo.Session, evt *discordgo.MessageCreate) {
 	// Run preliminary tests: is the user sending the message a bot?
 	if !evt.Message.Author.Bot {
