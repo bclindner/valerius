@@ -18,26 +18,31 @@ type Command interface {
 	Run(*discordgo.Session, *discordgo.MessageCreate) error
 }
 
+// Base command structure.
 type BaseCommand struct {
+	Command
+	// Human-readable name of the command, for logging purposes.
+	// In the handler, This is retrieved through Name().
 	name string
 }
 
+// Print the set name of the BaseCommand.
 func (b BaseCommand) Name() string {
 	return b.name
 }
 
-// Struct for the bot message handler. Currently this just contains a list of commands
-// Should extend the Handler interface.
+// Struct for the bot message handler. Currently this just contains a list of commands.
 type MessageHandler struct {
 	Handler
-	Commands []Command
+	// List of commands to test.
+	commands []Command
 }
 
 // Interface for the bot message handler.
 // Has Handle and Add functions that handle commands and add new ones.
 type Handler interface {
+	// Handle a Discord command.
 	Handle(*discordgo.Session, *discordgo.MessageCreate)
-	Add(...Command)
 }
 
 // Create a new handler and bind it to a Session.
@@ -54,7 +59,7 @@ func (c *MessageHandler) Handle(bot *discordgo.Session, evt *discordgo.MessageCr
 	// Run preliminary tests: is the user sending the message a bot?
 	if !evt.Message.Author.Bot {
 		// For each command:
-		for _, cmd := range c.Commands {
+		for _, cmd := range c.commands {
 			// Handle it as a goroutine to speed things up
 			go func(cmd Command) {
 				// If the test checks out,
@@ -75,7 +80,7 @@ func (c *MessageHandler) Handle(bot *discordgo.Session, evt *discordgo.MessageCr
 							"command":  cmd.Name(),
 							"userID":   author.ID,
 							"username": author.Username + "#" + author.Discriminator,
-							"error": err,
+							"error":    err,
 						}).Error("Command failed")
 					}
 				}
@@ -86,5 +91,5 @@ func (c *MessageHandler) Handle(bot *discordgo.Session, evt *discordgo.MessageCr
 
 // Add commands to the handler.
 func (c *MessageHandler) Add(cmds ...Command) {
-	c.Commands = append(c.Commands, cmds...)
+	c.commands = append(c.commands, cmds...)
 }

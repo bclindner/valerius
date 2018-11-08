@@ -28,7 +28,7 @@ func init() {
 	flag.Parse()
 	// log to a file as well as stdout if the -log flag was set
 	if *logPath != "" {
-		logfile, err := os.OpenFile(*logPath, os.O_WRONLY|os.O_CREATE|os.O_APPEND, 0644)
+		logfile, err := os.OpenFile(*logPath, os.O_WRONLY|os.O_APPEND|os.O_CREATE, 0644)
 		if err != nil {
 			log.Fatal("Unable to establish logging: ", err)
 		}
@@ -57,7 +57,9 @@ func initBot() (bot *discordgo.Session, user *discordgo.User, err error) {
 	bot, err = discordgo.New("Bot " + config.BotToken)
 	// get the current bot user
 	user, err = bot.User("@me")
-	if err != nil { return }
+	if err != nil {
+		return
+	}
 	log.Info("Bot logged in as ", user.Username, "#", user.Discriminator)
 	return
 }
@@ -72,7 +74,7 @@ func main() {
 	handler := NewMessageHandler(bot, user)
 	// add handler commands
 	handler.Add(NewHelloCommand("Hello World command"))
-	handler.Add(NewPingPongCommand("PingPong command","ping", "pong"))
+	// handler.Add(NewPingPongCommand("PingPong command","ping", "pong"))
 	handler.Add(NewXKCDCommand("XKCD command"))
 	if len(config.Bangers) == 0 {
 		log.Warn("No bangers in config file; not adding banger alert command")

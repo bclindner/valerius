@@ -10,6 +10,7 @@ type HelloCommand struct {
 	BaseCommand
 }
 
+// Generates a new HelloCommand.
 func NewHelloCommand(name string) HelloCommand {
 	return HelloCommand{
 		BaseCommand: BaseCommand{
