@@ -6,17 +6,20 @@ import (
 )
 
 type PingPongCommand struct {
-	Command
+	BaseCommand
 	PingString string
 	PongString string
 }
 
 func (p PingPongCommand) Name() string {
-	return "PingPong command"
+	return p.name
 }
 
-func NewPingPongCommand(ping string, pong string) PingPongCommand {
+func NewPingPongCommand(name string, ping string, pong string) PingPongCommand {
 	return PingPongCommand{
+		BaseCommand: BaseCommand{
+			name: name,
+		},
 		PingString: ping,
 		PongString: pong,
 	}

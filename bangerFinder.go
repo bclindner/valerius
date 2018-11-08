@@ -10,18 +10,13 @@ import (
 // predefined links and post it. It's mostly made for posting bangers
 // from the list already defined for BangerAlertCommand.
 type BangerFinderCommand struct {
-	Command
+	BaseCommand
 	RNG     *rand.Rand
 	Bangers *[]string
 }
 
-// Returns the name of the command.
-func (b BangerFinderCommand) Name() string {
-	return "Banger Finder"
-}
-
 // Generates a new BangerFinderCommand.
-func NewBangerFinderCommand(bangers *[]string) BangerFinderCommand {
+func NewBangerFinderCommand(name string, bangers *[]string) BangerFinderCommand {
 	// initialize RNG if not done already
 	rng := rand.New(rand.NewSource(253489732658))
 	// Check if bangers are available, if not, panic (for now)
@@ -29,6 +24,9 @@ func NewBangerFinderCommand(bangers *[]string) BangerFinderCommand {
 		log.Fatal("No bangers found")
 	}
 	newCommand := BangerFinderCommand{
+		BaseCommand: BaseCommand{
+			name: name,
+		},
 		RNG:     rng,
 		Bangers: bangers,
 	}

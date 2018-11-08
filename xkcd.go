@@ -13,6 +13,8 @@ import (
 // The XKCDCommand base structure. Takes a Regexp to test the command.
 type XKCDCommand struct {
 	Command
+	BaseCommand
+	name string
 	Regexp *regexp.Regexp
 }
 
@@ -25,17 +27,21 @@ type XKCDComic struct {
 	Image     string `json:"img"`
 }
 
-func (p XKCDCommand) Name() string {
-	return "XKCD Viewer"
+func (x XKCDCommand) Name() string {
+	return x.name
 }
 
-func NewXKCDCommand() XKCDCommand {
+func NewXKCDCommand(name string) XKCDCommand {
 	// Instantiate the regex.
 	rgx, err := regexp.Compile(`^\!xkcd ?([0-9]+)?$`)
 	if err != nil {
 		log.Fatal(err)
 	}
 	return XKCDCommand{
+		BaseCommand: BaseCommand{
+			name: name,
+		},
+		name: name,
 		Regexp: rgx,
 	}
 }

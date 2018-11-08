@@ -8,13 +8,21 @@ import (
 // Interface for commands that can be handled by the MessageHandler.
 type Command interface {
 	// Returns a human-readable name for the function, for logging purposes.
-	PrettyName() string
+	Name() string
 	// Command test. Whenever a message is sent, this test is run.
 	// If it passes, the handler calls the Run() method.
 	Test(*discordgo.Session, *discordgo.MessageCreate) bool
 	// Runs the function. This can theoretically do anything, but is most
 	// commonly used to reply to or otherwise process a message.
 	Run(*discordgo.Session, *discordgo.MessageCreate)
+}
+
+type BaseCommand struct {
+	name string
+}
+
+func (b BaseCommand) Name() string {
+	return b.name
 }
 
 // Struct for the bot message handler. Currently this just contains a list of commands

@@ -7,16 +7,15 @@ import (
 // A simple command that just returns "Hello, world!"
 // Essentially just an example command for the CommandHandler.
 type HelloCommand struct {
-	Command
+	BaseCommand
 }
 
-// 
-func (p HelloCommand) Name() string {
-	return "Hello World"
-}
-
-func NewHelloCommand() HelloCommand {
-	return HelloCommand{}
+func NewHelloCommand(name string) HelloCommand {
+	return HelloCommand{
+		BaseCommand: BaseCommand{
+			name: name,
+		},
+	}
 }
 
 func (h HelloCommand) Test(bot *discordgo.Session, evt *discordgo.MessageCreate) bool {

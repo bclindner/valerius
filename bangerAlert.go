@@ -10,7 +10,7 @@ import (
 // to a particularly good song is posted. Along with the message, it may also
 // post links, specifically of people dancing.
 type BangerAlertCommand struct {
-	Command
+	BaseCommand
 	// Random number generator to use to get a random dance GIF.
 	RNG           *rand.Rand
 	// Message to display when a banger is posted.
@@ -24,13 +24,8 @@ type BangerAlertCommand struct {
 	DanceGifs     *[]string
 }
 
-// Returns the name of the command.
-func (b BangerAlertCommand) Name() string {
-	return "Banger Alert"
-}
-
 // Generates a new BangerAlertCommand.
-func NewBangerAlertCommand(bangers *[]string, gifs *[]string) BangerAlertCommand {
+func NewBangerAlertCommand(name string, bangers *[]string, gifs *[]string) BangerAlertCommand {
 	// initialize RNG if not done already
 	rng := rand.New(rand.NewSource(253489732658))
 	bmessage := "🚨OH🚨SHIT🚨IT'S🚨A🚨BANGER🚨 "
@@ -39,6 +34,9 @@ func NewBangerAlertCommand(bangers *[]string, gifs *[]string) BangerAlertCommand
 		log.Fatal("No bangers found")
 	}
 	newCommand := BangerAlertCommand{
+		BaseCommand: BaseCommand{
+			name: name,
+		},
 		RNG:           rng,
 		Bangers:       bangers,
 		DanceEnabled:  len(*gifs) != 0,
