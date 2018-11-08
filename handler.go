@@ -1,7 +1,7 @@
 package main
 
 import (
-	"github.com/bwmarrin/discordgo" // for running the bot
+	"github.com/bwmarrin/discordgo"  // for running the bot
 	log "github.com/sirupsen/logrus" // logging suite
 )
 
@@ -13,7 +13,7 @@ type Command interface {
 
 type MessageHandler struct {
 	Commands []Command
-	UserID string
+	UserID   string
 }
 
 type Handler interface {
@@ -42,9 +42,9 @@ func (c *MessageHandler) Handle(bot *discordgo.Session, evt *discordgo.MessageCr
 					// log it,
 					author := *evt.Message.Author
 					log.WithFields(log.Fields{
-						"text": evt.Message.Content,
-						"command": cmd.Name(),
-						"userID": author.ID,
+						"text":     evt.Message.Content,
+						"command":  cmd.Name(),
+						"userID":   author.ID,
 						"username": author.Username + "#" + author.Discriminator,
 					}).Info("Command fired")
 					// and run the command

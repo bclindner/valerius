@@ -1,18 +1,18 @@
 package main
 
 import (
+	"github.com/bwmarrin/discordgo"  // for running the bot
 	log "github.com/sirupsen/logrus" // logging suite
-	"github.com/bwmarrin/discordgo" // for running the bot
 	"math/rand"
 )
 
 type BangerAlertCommand struct {
 	Command
-	RNG *rand.Rand
+	RNG           *rand.Rand
 	BangerMessage string
-	Bangers *[]string
-	DanceEnabled bool
-	DanceGifs *[]string
+	Bangers       *[]string
+	DanceEnabled  bool
+	DanceGifs     *[]string
 }
 
 func (b BangerAlertCommand) Name() string {
@@ -28,15 +28,15 @@ func NewBangerAlertCommand(bangers *[]string, gifs *[]string) BangerAlertCommand
 		log.Fatal("No bangers found")
 	}
 	newCommand := BangerAlertCommand{
-			RNG: rng,
-			Bangers: bangers,
-			DanceEnabled: len(*gifs) != 0,
-			DanceGifs: gifs,
-			BangerMessage: bmessage,
-		}
-	log.Info(len(*newCommand.Bangers)," bangers loaded.")
-	log.Info(len(*newCommand.DanceGifs)," dance GIFs loaded.")
-return newCommand
+		RNG:           rng,
+		Bangers:       bangers,
+		DanceEnabled:  len(*gifs) != 0,
+		DanceGifs:     gifs,
+		BangerMessage: bmessage,
+	}
+	log.Info(len(*newCommand.Bangers), " bangers loaded.")
+	log.Info(len(*newCommand.DanceGifs), " dance GIFs loaded.")
+	return newCommand
 }
 
 func (b BangerAlertCommand) Test(bot *discordgo.Session, evt *discordgo.MessageCreate) bool {

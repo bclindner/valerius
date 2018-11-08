@@ -1,11 +1,11 @@
 package main
 
 import (
-	log "github.com/sirupsen/logrus" // logging suite
-	"github.com/bwmarrin/discordgo" // for running the bot
 	"encoding/json"
+	"github.com/bwmarrin/discordgo"  // for running the bot
+	log "github.com/sirupsen/logrus" // logging suite
+	"io/ioutil"                      // for opening response body
 	"net/http"
-	"io/ioutil" // for opening response body
 	"regexp"
 	"strconv"
 )
@@ -18,11 +18,11 @@ type XKCDCommand struct {
 
 // XKCD API structure, for parsing the XKCD comic API.
 type XKCDComic struct {
-	Number int `json:"num"`
-	Title string `json:"title"`
+	Number    int    `json:"num"`
+	Title     string `json:"title"`
 	SafeTitle string `json:"safe_title"`
-	Alt string `json:"alt"`
-	Image string `json:"img"`
+	Alt       string `json:"alt"`
+	Image     string `json:"img"`
 }
 
 func (p XKCDCommand) Name() string {
@@ -31,8 +31,10 @@ func (p XKCDCommand) Name() string {
 
 func NewXKCDCommand() XKCDCommand {
 	// Instantiate the regex.
-	rgx , err := regexp.Compile(`^\!xkcd ?([0-9]+)?$`)
-	if err != nil { log.Fatal(err) }
+	rgx, err := regexp.Compile(`^\!xkcd ?([0-9]+)?$`)
+	if err != nil {
+		log.Fatal(err)
+	}
 	return XKCDCommand{
 		Regexp: rgx,
 	}
@@ -48,7 +50,7 @@ func (x XKCDCommand) Run(bot *discordgo.Session, evt *discordgo.MessageCreate) {
 	// Get the endpoint necessary
 	var endpoint string
 	if comicNumber != "" {
-		endpoint = "https://xkcd.com/"+comicNumber+"/info.0.json"
+		endpoint = "https://xkcd.com/" + comicNumber + "/info.0.json"
 	} else {
 		endpoint = "https://xkcd.com/info.0.json"
 	}
@@ -57,9 +59,9 @@ func (x XKCDCommand) Run(bot *discordgo.Session, evt *discordgo.MessageCreate) {
 	// Error out if it failed or did not return 200
 	if err != nil || resp.StatusCode != 200 {
 		log.WithFields(log.Fields{
-			"name": x.Name(),
+			"name":       x.Name(),
 			"statusCode": resp.StatusCode,
-			"error": err,
+			"error":      err,
 		}).Error("Command failed")
 		return
 	}
@@ -67,7 +69,7 @@ func (x XKCDCommand) Run(bot *discordgo.Session, evt *discordgo.MessageCreate) {
 	data, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
 		log.WithFields(log.Fields{
-			"name": x.Name(),
+			"name":  x.Name(),
 			"error": err,
 		}).Error("Command failed")
 		return
@@ -79,15 +81,15 @@ func (x XKCDCommand) Run(bot *discordgo.Session, evt *discordgo.MessageCreate) {
 	err = json.Unmarshal(data, &comic)
 	if err != nil {
 		log.WithFields(log.Fields{
-			"name": x.Name(),
+			"name":  x.Name(),
 			"error": err,
 		}).Error("Command failed")
 		return
 	}
 	// Send the message as an embed
 	bot.ChannelMessageSendEmbed(evt.Message.ChannelID, &discordgo.MessageEmbed{
-		URL: "https://xkcd.com/"+comicNumber,
-		Title: "XKCD "+strconv.Itoa(comic.Number)+": "+comic.SafeTitle,
+		URL:         "https://xkcd.com/" + comicNumber,
+		Title:       "XKCD " + strconv.Itoa(comic.Number) + ": " + comic.SafeTitle,
 		Description: comic.Alt,
 		Image: &discordgo.MessageEmbedImage{
 			URL: comic.Image,

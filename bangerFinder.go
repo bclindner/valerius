@@ -1,14 +1,14 @@
 package main
 
 import (
+	"github.com/bwmarrin/discordgo"  // for running the bot
 	log "github.com/sirupsen/logrus" // logging suite
-	"github.com/bwmarrin/discordgo" // for running the bot
 	"math/rand"
 )
 
 type BangerFinderCommand struct {
 	Command
-	RNG *rand.Rand
+	RNG     *rand.Rand
 	Bangers *[]string
 }
 
@@ -24,9 +24,9 @@ func NewBangerFinderCommand(bangers *[]string) BangerFinderCommand {
 		log.Fatal("No bangers found")
 	}
 	newCommand := BangerFinderCommand{
-			RNG: rng,
-			Bangers: bangers,
-		}
+		RNG:     rng,
+		Bangers: bangers,
+	}
 	return newCommand
 }
 

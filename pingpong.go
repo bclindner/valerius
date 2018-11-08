@@ -2,7 +2,7 @@ package main
 
 import (
 	"github.com/bwmarrin/discordgo" // for running the bot
-	"strings" // for command testing
+	"strings"                       // for command testing
 )
 
 type PingPongCommand struct {
