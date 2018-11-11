@@ -14,19 +14,19 @@ It's best to learn by example here. This is an example config similar to the one
   "botToken": "YOUR_DISCORD_BOT_TOKEN_HERE",
   "commands": [
     {
-      "name": "Yeet",
+      "name": "Hello",
       "type": "pingpong",
       "options": {
-        "triggers": ["this bitch empty"],
-        "response": "**YEET**"
+        "triggers": ["!hello"],
+        "response": "Hello world!"
       }
     },
     {
-      "name": "SansUndertaleFuckedMyMom",
+      "name": "RegExample",
       "type": "regexpingpong",
       "options": {
-        "trigger": "^sans.+fucked.+mom$",
-        "response": "https://i.imgur.com/HZC5xjh.png"
+        "trigger": "https?://[\\S]+",
+        "response": "Yep, that looks like a link."
       }
     },
     {
@@ -54,7 +54,7 @@ It's best to learn by example here. This is an example config similar to the one
           "https://thumbs.gfycat.com/AgitatedGleefulEmperorshrimp-size_restricted.gif",
           "https://media0.giphy.com/media/CDzdJSkC4iyLC/giphy.gif"
         ],
-        "responsePrefix": "🚨OH🚨SHIT🚨IT'S🚨A🚨BANGER🚨\n"
+        "responsePrefix": "🚨IT'S🚨A🚨BANGER🚨\n"
       }
     },
     {
