@@ -51,7 +51,7 @@ type Handler interface {
 }
 
 // Create a new handler and bind it to a Session.
-func NewMessageHandler(bot *discordgo.Session, user *discordgo.User) *MessageHandler {
+func NewMessageHandler(bot *discordgo.Session) *MessageHandler {
 	handler := MessageHandler{}
 	bot.AddHandler(handler.Handle)
 	return &handler
@@ -62,38 +62,39 @@ func NewMessageHandler(bot *discordgo.Session, user *discordgo.User) *MessageHan
 // the action as well.
 func (c *MessageHandler) Handle(bot *discordgo.Session, evt *discordgo.MessageCreate) {
 	// Run preliminary tests: is the user sending the message a bot?
-	if !evt.Message.Author.Bot {
-		// For each command:
-		for _, cmd := range c.commands {
-			// Handle it as a goroutine to speed things up
-			go func(cmd Command) {
-				// If the test checks out,
-				if cmd.Test(bot, evt) {
-					// log it,
-					author := *evt.Message.Author
+	if evt.Message.Author.Bot { return }
+	// Is this message being sent in a guild (i.e. not a PM?)
+	if evt.Message.GuildID == "" { return }
+	// For each command:
+	for _, cmd := range c.commands {
+		// Handle it as a goroutine to speed things up
+		go func(cmd Command) {
+			// If the test checks out,
+			if cmd.Test(bot, evt) {
+				// log it,
+				author := *evt.Message.Author
+				log.WithFields(log.Fields{
+					"text":     evt.Message.Content,
+					"command":  cmd.GetName(),
+					"type":  cmd.GetType(),
+					"userID":   author.ID,
+					"username": author.Username + "#" + author.Discriminator,
+				}).Info("Command fired")
+				// and run the command
+				err := cmd.Run(bot, evt)
+				if err != nil {
+					// Log if it failed, too
 					log.WithFields(log.Fields{
 						"text":     evt.Message.Content,
 						"command":  cmd.GetName(),
 						"type":  cmd.GetType(),
 						"userID":   author.ID,
 						"username": author.Username + "#" + author.Discriminator,
-					}).Info("Command fired")
-					// and run the command
-					err := cmd.Run(bot, evt)
-					if err != nil {
-						// Log if it failed, too
-						log.WithFields(log.Fields{
-							"text":     evt.Message.Content,
-							"command":  cmd.GetName(),
-							"type":  cmd.GetType(),
-							"userID":   author.ID,
-							"username": author.Username + "#" + author.Discriminator,
-							"error":    err,
-						}).Error("Command failed")
-					}
+						"error":    err,
+					}).Error("Command failed")
 				}
-			}(cmd)
-		}
+			}
+		}(cmd)
 	}
 }
 

@@ -42,7 +42,6 @@ func init() {
 		log.SetFormatter(&log.JSONFormatter{})
 	}
 
-	// setup logrus config
 	// load bot config file
 	configFile, err := ioutil.ReadFile(*configPath)
 	if err != nil {
@@ -56,12 +55,12 @@ func init() {
 }
 
 // Initialize the bot.
-func initBot() (bot *discordgo.Session, user *discordgo.User, err error) {
+func initBot() (bot *discordgo.Session, err error) {
 	log.Info("Bot initializing")
 	// initialize the bot
 	bot, err = discordgo.New("Bot " + config.BotToken)
 	// get the current bot user
-	user, err = bot.User("@me")
+	user, err := bot.User("@me")
 	if err != nil {
 		return
 	}
@@ -71,12 +70,12 @@ func initBot() (bot *discordgo.Session, user *discordgo.User, err error) {
 
 func main() {
 	// initialize the bot
-	bot, user, err := initBot()
+	bot, err := initBot()
 	if err != nil {
 		log.Fatal("Failed to initialize bot: ", err)
 	}
 	// instantiate and register the handler
-	handler := NewMessageHandler(bot, user)
+	handler := NewMessageHandler(bot)
 	// add handler commands
 	for _, config := range config.Commands {
 		switch config.Type {
@@ -86,6 +85,10 @@ func main() {
 				handler.Add(cmd)
 			case "randompingpong":
 				cmd, err := NewRandomPingPongCommand(config)
+				if err != nil { log.Fatal("Error with command "+config.Name+": ",err) }
+				handler.Add(cmd)
+			case "regexpingpong":
+				cmd, err := NewRegexPingPongCommand(config)
 				if err != nil { log.Fatal("Error with command "+config.Name+": ",err) }
 				handler.Add(cmd)
 			case "xkcd":
