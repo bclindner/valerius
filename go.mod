@@ -1,4 +1,4 @@
-module gitlab.com/bclindner/valerius/v0.1
+module gitlab.com/bclindner/valerius/v0.2
 
 require (
 	github.com/bwmarrin/discordgo v0.19.0

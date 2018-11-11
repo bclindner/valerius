@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"errors"
 	"github.com/bwmarrin/discordgo"  // for running the bot
-	log "github.com/sirupsen/logrus" // logging suite
 	"io/ioutil"                      // for opening response body
 	"net/http"
 	"regexp"
@@ -27,18 +26,18 @@ type XKCDComic struct {
 	Image     string `json:"img"`
 }
 
-func NewXKCDCommand(name string) XKCDCommand {
+func NewXKCDCommand(config CommandConfig) (command XKCDCommand, err error) {
 	// Instantiate the regex.
 	rgx, err := regexp.Compile(`^\!xkcd ?([0-9]+)?$`)
-	if err != nil {
-		log.Fatal(err)
-	}
-	return XKCDCommand{
+	if err != nil { return }
+	command = XKCDCommand{
 		BaseCommand: BaseCommand{
-			name: name,
+			Name: config.Name,
+			Type: config.Name,
 		},
 		regexp: rgx,
 	}
+	return
 }
 
 func (x XKCDCommand) Test(bot *discordgo.Session, evt *discordgo.MessageCreate) bool {
@@ -58,29 +57,19 @@ func (x XKCDCommand) Run(bot *discordgo.Session, evt *discordgo.MessageCreate) (
 	// Run a GET request to the endpoint
 	resp, err := http.Get(endpoint)
 	// Error out if it failed or did not return 200
-	if err != nil {
-		return
-	}
+	if err != nil { return }
 	if resp.StatusCode != 200 {
 		return errors.New("Error hitting XKCD API: response code not OK (" + strconv.Itoa(resp.StatusCode) + ")")
 	}
 	// Read the body to []bytes
 	data, err := ioutil.ReadAll(resp.Body)
-	if err != nil {
-		log.WithFields(log.Fields{
-			"name":  x.Name(),
-			"error": err,
-		}).Error("Command failed")
-		return
-	}
+	if err != nil { return }
 	// Close the body (it is no longer necessary)
 	resp.Body.Close()
 	// Instantiate an XKCDComic object and map the JSON to the object
 	comic := XKCDComic{}
 	err = json.Unmarshal(data, &comic)
-	if err != nil {
-		return
-	}
+	if err != nil { return }
 	// Send the message as an embed
 	_, err = bot.ChannelMessageSendEmbed(evt.Message.ChannelID, &discordgo.MessageEmbed{
 		URL:         "https://xkcd.com/" + comicNumber,

@@ -14,8 +14,13 @@ import (
 // Structure for the bot configuration JSON file.
 type BotConfiguration struct {
 	BotToken  string   `json:"botToken"`
-	Bangers   []string `json:"bangers"`
-	DanceGifs []string `json:"danceGifs"`
+	Commands []CommandConfig `json:"commands"`
+}
+
+type CommandConfig struct {
+	Name string
+	Type string
+	Options json.RawMessage
 }
 
 var config BotConfiguration
@@ -73,14 +78,21 @@ func main() {
 	// instantiate and register the handler
 	handler := NewMessageHandler(bot, user)
 	// add handler commands
-	handler.Add(NewHelloCommand("Hello World command"))
-	// handler.Add(NewPingPongCommand("PingPong command","ping", "pong"))
-	handler.Add(NewXKCDCommand("XKCD command"))
-	if len(config.Bangers) == 0 {
-		log.Warn("No bangers in config file; not adding banger alert command")
-	} else {
-		handler.Add(NewBangerAlertCommand("Banger Alert command", &config.Bangers, &config.DanceGifs))
-		handler.Add(NewBangerFinderCommand("Banger Finder command", &config.Bangers))
+	for _, config := range config.Commands {
+		switch config.Type {
+			case "pingpong":
+				cmd, err := NewPingPongCommand(config)
+				if err != nil { log.Fatal("Error with command "+config.Name+": ",err) }
+				handler.Add(cmd)
+			case "randompingpong":
+				cmd, err := NewRandomPingPongCommand(config)
+				if err != nil { log.Fatal("Error with command "+config.Name+": ",err) }
+				handler.Add(cmd)
+			case "xkcd":
+				cmd, err := NewXKCDCommand(config)
+				if err != nil { log.Fatal("Error with command "+config.Name+": ",err) }
+				handler.Add(cmd)
+		}
 	}
 	// open the bot to be used
 	bot.Open()

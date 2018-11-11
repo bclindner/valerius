@@ -8,7 +8,8 @@ import (
 // Interface for commands that can be handled by the MessageHandler.
 type Command interface {
 	// Returns a human-readable name for the function, for logging purposes.
-	Name() string
+	GetName() string
+	GetType() string
 	// Command test. Whenever a message is sent, this test is run.
 	// If it passes, the handler calls the Run() method.
 	Test(*discordgo.Session, *discordgo.MessageCreate) bool
@@ -22,13 +23,17 @@ type Command interface {
 type BaseCommand struct {
 	Command
 	// Human-readable name of the command, for logging purposes.
-	// In the handler, This is retrieved through Name().
-	name string
+	// In the handler, This is retrieved through GetName().
+	Name string
+	Type string
 }
 
 // Print the set name of the BaseCommand.
-func (b BaseCommand) Name() string {
-	return b.name
+func (b BaseCommand) GetName() string {
+	return b.Name
+}
+func (b BaseCommand) GetType() string {
+	return b.Type
 }
 
 // Struct for the bot message handler. Currently this just contains a list of commands.
@@ -68,16 +73,19 @@ func (c *MessageHandler) Handle(bot *discordgo.Session, evt *discordgo.MessageCr
 					author := *evt.Message.Author
 					log.WithFields(log.Fields{
 						"text":     evt.Message.Content,
-						"command":  cmd.Name(),
+						"command":  cmd.GetName(),
+						"type":  cmd.GetType(),
 						"userID":   author.ID,
 						"username": author.Username + "#" + author.Discriminator,
 					}).Info("Command fired")
 					// and run the command
 					err := cmd.Run(bot, evt)
 					if err != nil {
+						// Log if it failed, too
 						log.WithFields(log.Fields{
 							"text":     evt.Message.Content,
-							"command":  cmd.Name(),
+							"command":  cmd.GetName(),
+							"type":  cmd.GetType(),
 							"userID":   author.ID,
 							"username": author.Username + "#" + author.Discriminator,
 							"error":    err,

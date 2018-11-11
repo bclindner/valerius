@@ -2,33 +2,42 @@ package main
 
 import (
 	"github.com/bwmarrin/discordgo" // for running the bot
-	"strings"                       // for command testing
+	"encoding/json"
 )
 
 type PingPongCommand struct {
 	BaseCommand
-	PingString string
-	PongString string
+	PingPongConfig
 }
 
-func (p PingPongCommand) Name() string {
-	return p.name
+type PingPongConfig struct {
+	Triggers []string `json:"triggers"`
+	Response string `json:"response"`
 }
 
-func NewPingPongCommand(name string, ping string, pong string) PingPongCommand {
-	return PingPongCommand{
+func NewPingPongCommand(config CommandConfig) (command PingPongCommand, err error) {
+	options := PingPongConfig{}
+	err = json.Unmarshal(config.Options, &options)
+	if err != nil { return }
+	command = PingPongCommand{
 		BaseCommand: BaseCommand{
-			name: name,
+			Name: config.Name,
+			Type: config.Type,
 		},
-		PingString: ping,
-		PongString: pong,
+		PingPongConfig: options,
 	}
+	return
 }
 
 func (p PingPongCommand) Test(bot *discordgo.Session, evt *discordgo.MessageCreate) bool {
-	return strings.Contains(evt.Message.Content, p.PingString)
+	for _, trigger := range p.Triggers {
+		if evt.Message.Content == trigger {
+			return true
+		}
+	}
+	return false
 }
 func (p PingPongCommand) Run(bot *discordgo.Session, evt *discordgo.MessageCreate) (err error) {
-	_, err = bot.ChannelMessageSend(evt.Message.ChannelID, p.PongString)
+	_, err = bot.ChannelMessageSend(evt.Message.ChannelID, p.Response)
 	return
 }
