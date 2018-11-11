@@ -1,3 +1,6 @@
 default:
-	go build -ldflags="-s -w" -o valerius_linux
-	GOOS=windows go build -ldflags="-s -w" -o valerius_windows.exe
+	GOOS=linux GOARCH=amd64 go build -ldflags="-s -w" -o valerius_linux_x64
+	GOOS=linux GOARCH=386 go build -ldflags="-s -w" -o valerius_linux_x86
+	GOOS=linux GOARCH=arm go build -ldflags="-s -w" -o valerius_linux_arm
+	GOOS=windows GOARCH=amd64 go build -ldflags="-s -w" -o valerius_windows_x64.exe
+	GOOS=windows GOARCH=386 go build -ldflags="-s -w" -o valerius_windows_x86.exe
