@@ -13,13 +13,19 @@ import (
 
 // Structure for the bot configuration JSON file.
 type BotConfiguration struct {
+	// Token that the bot logs in with.
 	BotToken  string   `json:"botToken"`
+	// List of commands to try and create.
 	Commands []CommandConfig `json:"commands"`
 }
 
 type CommandConfig struct {
+	// Name of the command.
 	Name string
+	// Type of the command.
 	Type string
+	// JSON-encoded list of options for the command.
+	// This is intended to be handled by the command factory.
 	Options json.RawMessage
 }
 
@@ -41,7 +47,6 @@ func init() {
 		log.SetOutput(io.MultiWriter(os.Stdout, logfile))
 		log.SetFormatter(&log.JSONFormatter{})
 	}
-
 	// load bot config file
 	configFile, err := ioutil.ReadFile(*configPath)
 	if err != nil {
@@ -57,13 +62,14 @@ func init() {
 // Initialize the bot.
 func initBot() (bot *discordgo.Session, err error) {
 	log.Info("Bot initializing")
-	// initialize the bot
+	// start the bot session
 	bot, err = discordgo.New("Bot " + config.BotToken)
-	// get the current bot user
+	// get the current bot user (to figure out who we are)
 	user, err := bot.User("@me")
 	if err != nil {
 		return
 	}
+	// log who we are
 	log.Info("Bot logged in as ", user.Username, "#", user.Discriminator)
 	return
 }
@@ -78,6 +84,7 @@ func main() {
 	handler := NewMessageHandler(bot)
 	// add handler commands
 	for _, config := range config.Commands {
+		// TODO find a cleaner way to register commands
 		switch config.Type {
 			case "pingpong":
 				cmd, err := NewPingPongCommand(config)

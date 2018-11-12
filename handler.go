@@ -25,6 +25,8 @@ type BaseCommand struct {
 	// Human-readable name of the command, for logging purposes.
 	// In the handler, This is retrieved through GetName().
 	Name string
+	// Human-readable type of the command, for logging purposes.
+	// In the handler, This is retrieved through GetType().
 	Type string
 }
 
@@ -32,6 +34,8 @@ type BaseCommand struct {
 func (b BaseCommand) GetName() string {
 	return b.Name
 }
+
+// Print the set type of the BaseCommand.
 func (b BaseCommand) GetType() string {
 	return b.Type
 }

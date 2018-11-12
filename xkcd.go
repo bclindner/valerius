@@ -13,23 +13,30 @@ import (
 // The XKCDCommand base structure. Takes a Regexp to test the command.
 type XKCDCommand struct {
 	BaseCommand
-	// Regexp to test with.
+	// Regexp to test with. This is set by the factory function.
 	regexp *regexp.Regexp
 }
 
 // XKCD API structure, for parsing the XKCD comic API.
 type XKCDComic struct {
+	// Comic number.
 	Number    int    `json:"num"`
+	// Comic title.
 	Title     string `json:"title"`
+	// Safe title (unsure what this does? safe encoding maybe?)
 	SafeTitle string `json:"safe_title"`
+	// Alt text for the comic.
 	Alt       string `json:"alt"`
+	// Image URL.
 	Image     string `json:"img"`
 }
 
+// Generate a new XKCDCommand.
 func NewXKCDCommand(config CommandConfig) (command XKCDCommand, err error) {
 	// Instantiate the regex.
 	rgx, err := regexp.Compile(`^\!xkcd ?([0-9]+)?$`)
 	if err != nil { return }
+	// generate the command
 	command = XKCDCommand{
 		BaseCommand: BaseCommand{
 			Name: config.Name,
@@ -48,6 +55,7 @@ func (x XKCDCommand) Run(bot *discordgo.Session, evt *discordgo.MessageCreate) (
 	// Get the comic number from the regex group matches
 	comicNumber := x.regexp.FindStringSubmatch(evt.Message.Content)[1]
 	// Get the endpoint necessary
+	// The most recent comic has a slightly different endpoint format
 	var endpoint string
 	if comicNumber != "" {
 		endpoint = "https://xkcd.com/" + comicNumber + "/info.0.json"
@@ -61,7 +69,7 @@ func (x XKCDCommand) Run(bot *discordgo.Session, evt *discordgo.MessageCreate) (
 	if resp.StatusCode != 200 {
 		return errors.New("Error hitting XKCD API: response code not OK (" + strconv.Itoa(resp.StatusCode) + ")")
 	}
-	// Read the body to []bytes
+	// Read the body to []bytes (to parse as JSON)
 	data, err := ioutil.ReadAll(resp.Body)
 	if err != nil { return }
 	// Close the body (it is no longer necessary)
