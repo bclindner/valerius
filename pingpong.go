@@ -1,8 +1,8 @@
 package main
 
 import (
-	"github.com/bwmarrin/discordgo" // for running the bot
 	"encoding/json"
+	"github.com/bwmarrin/discordgo" // for running the bot
 )
 
 type PingPongCommand struct {
@@ -12,13 +12,15 @@ type PingPongCommand struct {
 
 type PingPongConfig struct {
 	Triggers []string `json:"triggers"`
-	Response string `json:"response"`
+	Response string   `json:"response"`
 }
 
 func NewPingPongCommand(config CommandConfig) (command PingPongCommand, err error) {
 	options := PingPongConfig{}
 	err = json.Unmarshal(config.Options, &options)
-	if err != nil { return }
+	if err != nil {
+		return
+	}
 	command = PingPongCommand{
 		BaseCommand: BaseCommand{
 			Name: config.Name,

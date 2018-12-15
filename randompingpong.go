@@ -1,17 +1,17 @@
 package main
 
 import (
+	"encoding/json"
 	"github.com/bwmarrin/discordgo" // for running the bot
 	"math/rand"
 	"time"
-	"encoding/json"
 )
 
 type RandomPingPongConfig struct {
-	Triggers []string `json:"triggers"`
-	Responses []string `json:"responses"`
-	ResponsePrefix string `json:"responsePrefix"`
-	ResponseSuffix string `json:"responseSuffix"`
+	Triggers       []string `json:"triggers"`
+	Responses      []string `json:"responses"`
+	ResponsePrefix string   `json:"responsePrefix"`
+	ResponseSuffix string   `json:"responseSuffix"`
 }
 
 type RandomPingPongCommand struct {
@@ -30,7 +30,7 @@ func NewRandomPingPongCommand(config CommandConfig) (command RandomPingPongComma
 			Type: config.Type,
 		},
 		RandomPingPongConfig: options,
-		RNG: rng,
+		RNG:                  rng,
 	}
 	return
 }
@@ -50,4 +50,3 @@ func (p RandomPingPongCommand) Run(bot *discordgo.Session, evt *discordgo.Messag
 	_, err = bot.ChannelMessageSend(evt.Message.ChannelID, msg)
 	return
 }
-

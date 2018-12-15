@@ -13,13 +13,13 @@ import (
 
 // Structure for the bot configuration JSON file.
 type BotConfiguration struct {
-	BotToken  string   `json:"botToken"`
+	BotToken string          `json:"botToken"`
 	Commands []CommandConfig `json:"commands"`
 }
 
 type CommandConfig struct {
-	Name string
-	Type string
+	Name    string
+	Type    string
 	Options json.RawMessage
 }
 
@@ -79,22 +79,38 @@ func main() {
 	// add handler commands
 	for _, config := range config.Commands {
 		switch config.Type {
-			case "pingpong":
-				cmd, err := NewPingPongCommand(config)
-				if err != nil { log.Fatal("Error with command "+config.Name+": ",err) }
-				handler.Add(cmd)
-			case "randompingpong":
-				cmd, err := NewRandomPingPongCommand(config)
-				if err != nil { log.Fatal("Error with command "+config.Name+": ",err) }
-				handler.Add(cmd)
-			case "regexpingpong":
-				cmd, err := NewRegexPingPongCommand(config)
-				if err != nil { log.Fatal("Error with command "+config.Name+": ",err) }
-				handler.Add(cmd)
-			case "xkcd":
-				cmd, err := NewXKCDCommand(config)
-				if err != nil { log.Fatal("Error with command "+config.Name+": ",err) }
-				handler.Add(cmd)
+		case "pingpong":
+			cmd, err := NewPingPongCommand(config)
+			if err != nil {
+				log.Fatal("Error with command "+config.Name+": ", err)
+			}
+			handler.Add(cmd)
+		case "randompingpong":
+			cmd, err := NewRandomPingPongCommand(config)
+			if err != nil {
+				log.Fatal("Error with command "+config.Name+": ", err)
+			}
+			handler.Add(cmd)
+		case "regexpingpong":
+			cmd, err := NewRegexPingPongCommand(config)
+			if err != nil {
+				log.Fatal("Error with command "+config.Name+": ", err)
+			}
+			handler.Add(cmd)
+		case "xkcd":
+			cmd, err := NewXKCDCommand(config)
+			if err != nil {
+				log.Fatal("Error with command "+config.Name+": ", err)
+			}
+			handler.Add(cmd)
+		case "iasip":
+			cmd, err := NewIASIPCommand(config)
+			if err != nil {
+				log.Fatal("Error with command "+config.Name+": ", err)
+			}
+			handler.Add(cmd)
+		default:
+			log.Fatal("Command " + config.Name + " is of invalid type (" + config.Type + "). Exiting.")
 		}
 	}
 	// open the bot to be used

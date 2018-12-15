@@ -5,7 +5,7 @@ import (
 	log "github.com/sirupsen/logrus" // logging suite
 )
 
-// Interface for commands that can be handled by the MessageHandler.
+// Command is an interface for commands that can be handled by the MessageHandler.
 type Command interface {
 	// Returns a human-readable name for the function, for logging purposes.
 	GetName() string
@@ -19,7 +19,7 @@ type Command interface {
 	Run(*discordgo.Session, *discordgo.MessageCreate) error
 }
 
-// Base command structure.
+// BaseCommand is the base command structure.
 type BaseCommand struct {
 	Command
 	// Human-readable name of the command, for logging purposes.
@@ -28,7 +28,7 @@ type BaseCommand struct {
 	Type string
 }
 
-// Print the set name of the BaseCommand.
+// GetName prints the set name of the BaseCommand.
 func (b BaseCommand) GetName() string {
 	return b.Name
 }
@@ -62,9 +62,13 @@ func NewMessageHandler(bot *discordgo.Session) *MessageHandler {
 // the action as well.
 func (c *MessageHandler) Handle(bot *discordgo.Session, evt *discordgo.MessageCreate) {
 	// Run preliminary tests: is the user sending the message a bot?
-	if evt.Message.Author.Bot { return }
+	if evt.Message.Author.Bot {
+		return
+	}
 	// Is this message being sent in a guild (i.e. not a PM?)
-	if evt.Message.GuildID == "" { return }
+	if evt.Message.GuildID == "" {
+		return
+	}
 	// For each command:
 	for _, cmd := range c.commands {
 		// Handle it as a goroutine to speed things up
@@ -76,7 +80,7 @@ func (c *MessageHandler) Handle(bot *discordgo.Session, evt *discordgo.MessageCr
 				log.WithFields(log.Fields{
 					"text":     evt.Message.Content,
 					"command":  cmd.GetName(),
-					"type":  cmd.GetType(),
+					"type":     cmd.GetType(),
 					"userID":   author.ID,
 					"username": author.Username + "#" + author.Discriminator,
 				}).Info("Command fired")
@@ -87,7 +91,7 @@ func (c *MessageHandler) Handle(bot *discordgo.Session, evt *discordgo.MessageCr
 					log.WithFields(log.Fields{
 						"text":     evt.Message.Content,
 						"command":  cmd.GetName(),
-						"type":  cmd.GetType(),
+						"type":     cmd.GetType(),
 						"userID":   author.ID,
 						"username": author.Username + "#" + author.Discriminator,
 						"error":    err,

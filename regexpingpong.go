@@ -1,8 +1,8 @@
 package main
 
 import (
-	"github.com/bwmarrin/discordgo" // for running the bot
 	"encoding/json"
+	"github.com/bwmarrin/discordgo" // for running the bot
 	"regexp"
 )
 
@@ -13,23 +13,27 @@ type RegexPingPongCommand struct {
 }
 
 type RegexPingPongConfig struct {
-	Trigger string `json:"trigger"`
+	Trigger  string `json:"trigger"`
 	Response string `json:"response"`
 }
 
 func NewRegexPingPongCommand(config CommandConfig) (command RegexPingPongCommand, err error) {
 	options := RegexPingPongConfig{}
 	err = json.Unmarshal(config.Options, &options)
-	if err != nil { return }
+	if err != nil {
+		return
+	}
 	regex, err := regexp.Compile(options.Trigger)
-	if err != nil { return }
+	if err != nil {
+		return
+	}
 	command = RegexPingPongCommand{
 		BaseCommand: BaseCommand{
 			Name: config.Name,
 			Type: config.Type,
 		},
 		RegexPingPongConfig: options,
-		Regexp: regex,
+		Regexp:              regex,
 	}
 	return
 }
@@ -41,4 +45,3 @@ func (p RegexPingPongCommand) Run(bot *discordgo.Session, evt *discordgo.Message
 	_, err = bot.ChannelMessageSend(evt.Message.ChannelID, p.Response)
 	return
 }
-
