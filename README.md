@@ -60,12 +60,15 @@ It's best to learn by example here. This is an example config similar to the one
     {
       "name": "XKCD",
       "type": "xkcd"
+      "options": {
+        "prefix": "!xkcd",
+      }
     },
     {
       "name": "IASIP",
       "type": "iasip",
       "options": {
-        "trigger": "^!iasip (\".+\")$",
+        "trigger": "!iasip",
         "fontpath": "./textile.ttf",
         "quality": 100
       }
