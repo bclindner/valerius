@@ -92,18 +92,6 @@ func main() {
 				log.Fatal("Error with command "+config.Name+": ", err)
 			}
 			handler.Add(cmd)
-		case "randompingpong":
-			cmd, err := NewRandomPingPongCommand(config)
-			if err != nil {
-				log.Fatal("Error with command "+config.Name+": ", err)
-			}
-			handler.Add(cmd)
-		case "regexpingpong":
-			cmd, err := NewRegexPingPongCommand(config)
-			if err != nil {
-				log.Fatal("Error with command "+config.Name+": ", err)
-			}
-			handler.Add(cmd)
 		case "xkcd":
 			cmd, err := NewXKCDCommand(config)
 			if err != nil {

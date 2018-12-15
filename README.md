@@ -23,15 +23,15 @@ It's best to learn by example here. This is an example config similar to the one
     },
     {
       "name": "RegExample",
-      "type": "regexpingpong",
+      "type": "pingpong",
       "options": {
-        "trigger": "https?://[\\S]+",
+        "triggerregex": "https?://[\\S]+",
         "response": "Yep, that looks like a link."
       }
     },
     {
       "name": "Bangers",
-      "type": "randompingpong",
+      "type": "pingpong",
       "options": {
         "triggers": [
           "https://www.youtube.com/watch?v=kZf91MAwS7s",
@@ -68,7 +68,7 @@ It's best to learn by example here. This is an example config similar to the one
       "name": "IASIP",
       "type": "iasip",
       "options": {
-        "trigger": "!iasip",
+        "prefix": "!iasip",
         "fontpath": "./textile.ttf",
         "quality": 100
       }
