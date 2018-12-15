@@ -39,7 +39,7 @@ func NewIASIPCommand(config CommandConfig) (cmd IASIPCommand, err error) {
 	if err != nil {
 		return cmd, err
 	}
-	err = iasipgen.LoadFont("textile.ttf")
+	err = iasipgen.LoadFont(options.FontPath)
 	if err != nil {
 		return cmd, err
 	}
