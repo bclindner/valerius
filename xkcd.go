@@ -10,19 +10,20 @@ import (
 	"strconv"
 )
 
-// The XKCDCommand base structure. Takes a Regexp to test the command.
+// XKCDCommand base structure. Takes a Regexp to test the command.
 type XKCDCommand struct {
 	BaseCommand
 	XKCDConfig
 }
 
+// XKCDConfig is the config for the XKCDCommand.
 type XKCDConfig struct {
 	Prefix string `json:"prefix"`
 	// Regexp to test with. This is set by the factory function.
 	regexp *regexp.Regexp
 }
 
-// XKCD API structure, for parsing the XKCD comic API.
+// XKCDComic is XKCD's general API structure for a comic, for parsing the XKCD comic API.
 type XKCDComic struct {
 	// Comic number.
 	Number int `json:"num"`
@@ -36,7 +37,7 @@ type XKCDComic struct {
 	Image string `json:"img"`
 }
 
-// Generate a new XKCDCommand.
+// NewXKCDCommand generates a new XKCDConfig.
 func NewXKCDCommand(config CommandConfig) (command XKCDCommand, err error) {
 	var options XKCDConfig
 	err = json.Unmarshal(config.Options, &options)
@@ -60,10 +61,12 @@ func NewXKCDCommand(config CommandConfig) (command XKCDCommand, err error) {
 	return
 }
 
+// Test ensures the compiled regex passes.
 func (x XKCDCommand) Test(bot *discordgo.Session, evt *discordgo.MessageCreate) bool {
 	return x.regexp.MatchString(evt.Message.Content)
 }
 
+// Run hits the XKCD API, gets a comic, and returns it as an embed.
 func (x XKCDCommand) Run(bot *discordgo.Session, evt *discordgo.MessageCreate) (err error) {
 	// Get the comic number from the regex group matches
 	comicNumber := x.regexp.FindStringSubmatch(evt.Message.Content)[1]

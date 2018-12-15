@@ -118,8 +118,8 @@ func NewPingPongCommand(config CommandConfig) (command PingPongCommand, err erro
 	return command, nil
 }
 
+// Test runs the necessary test based on set trigger type.
 func (p PingPongCommand) Test(bot *discordgo.Session, evt *discordgo.MessageCreate) bool {
-	// Run the necessary test based on set trigger type
 	switch p.TriggerType {
 	case triggerSingle:
 		if len(p.Trigger) > 0 {
@@ -142,22 +142,30 @@ func (p PingPongCommand) Test(bot *discordgo.Session, evt *discordgo.MessageCrea
 			}
 		}
 	default: //uhhhHHHH
-		panic("No test for " + p.GetName())
+		panic("No trigger type for " + p.GetName() + " on message " + evt.Message.Content)
 	}
 	return false
 }
-func (p PingPongCommand) Run(bot *discordgo.Session, evt *discordgo.MessageCreate) (err error) {
-	// If Response is used, send the response
-	if len(p.Response) > 0 {
-		// Send the response
-		_, err = bot.ChannelMessageSend(evt.Message.ChannelID, p.ResponsePrefix+p.Response+p.ResponseSuffix)
 
+// Run either sends a static response or selects from a list of static responses.
+func (p PingPongCommand) Run(bot *discordgo.Session, evt *discordgo.MessageCreate) (err error) {
+	switch p.ResponseType {
+	case responseSingle:
+		_, err = bot.ChannelMessageSend(evt.Message.ChannelID, p.ResponsePrefix+p.Response+p.ResponseSuffix)
+		if err != nil {
+			return err
+		}
+	case responseMultiple:
+		if len(p.Responses) > 0 {
+			i := p.RNG.Intn(len(p.Responses))
+			// Send the response
+			_, err = bot.ChannelMessageSend(evt.Message.ChannelID, p.ResponsePrefix+p.Responses[i]+p.ResponseSuffix)
+			if err != nil {
+				return err
+			}
+		}
+	default: //HHHHHHHH
+		panic("No response type for " + p.GetName() + " on message " + evt.Message.Content)
 	}
-	// If Responses are used, send a random response from the list
-	if len(p.Responses) > 0 {
-		i := p.RNG.Intn(len(p.Responses))
-		// Send the response
-		_, err = bot.ChannelMessageSend(evt.Message.ChannelID, p.ResponsePrefix+p.Responses[i]+p.ResponseSuffix)
-	}
-	return
+	return nil
 }

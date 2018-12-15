@@ -11,7 +11,7 @@ import (
 	"os/signal"                      // for interrupt signal information
 )
 
-// Structure for the bot configuration JSON file.
+// BotConfiguration is the structure for the bot configuration JSON file.
 type BotConfiguration struct {
 	// Token that the bot logs in with.
 	BotToken string `json:"botToken"`
@@ -19,13 +19,14 @@ type BotConfiguration struct {
 	Commands []CommandConfig `json:"commands"`
 }
 
+// CommandConfig is the schema for each command in the BotConfiguration.
 type CommandConfig struct {
 	// Name of the command.
 	Name string
 	// Type of the command.
 	Type string
 	// JSON-encoded list of options for the command.
-	// This is intended to be handled by the command factory.
+	// This is intended to be parsed and handled by the "NewXCommand" factory function.
 	Options json.RawMessage
 }
 
@@ -80,6 +81,7 @@ func main() {
 	if err != nil {
 		log.Fatal("Failed to initialize bot: ", err)
 	}
+	defer bot.Close()
 	// instantiate and register the handler
 	handler := NewMessageHandler(bot)
 	// add handler commands
@@ -116,6 +118,4 @@ func main() {
 	<-sig
 	// close the bot websocket and exit the program
 	log.Info("Interrupt signal sent, shutting down...")
-	bot.Close()
-	log.Info("Bot closed down successfully. Goodbye")
 }

@@ -35,33 +35,34 @@ func (b BaseCommand) GetName() string {
 	return b.Name
 }
 
-// Print the set type of the BaseCommand.
+// GetType prints the set type of the BaseCommand.
 func (b BaseCommand) GetType() string {
 	return b.Type
 }
 
-// Struct for the bot message handler. Currently this just contains a list of commands.
+// MessageHandler handles Discordgo messages, testing them against Valerius-compatible commands.
+// The struct itself only contains the list of commands.
 type MessageHandler struct {
 	Handler
 	// List of commands to test.
 	commands []Command
 }
 
-// Interface for the bot message handler.
+// Handler is the interface for the bot message handler.
 // Has Handle and Add functions that handle commands and add new ones.
 type Handler interface {
 	// Handle a Discord command.
 	Handle(*discordgo.Session, *discordgo.MessageCreate)
 }
 
-// Create a new handler and bind it to a Session.
+// NewMessageHandler creates a new handler and binds it to a Session.
 func NewMessageHandler(bot *discordgo.Session) *MessageHandler {
 	handler := MessageHandler{}
 	bot.AddHandler(handler.Handle)
 	return &handler
 }
 
-// Handle a Discord message. This just runs the Test() function of each command,
+// Handle handles a Discord message. This just runs the Test() function of each command,
 // and if a command's test passes, the handler calls its Run() function, logging
 // the action as well.
 func (c *MessageHandler) Handle(bot *discordgo.Session, evt *discordgo.MessageCreate) {
