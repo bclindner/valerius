@@ -38,6 +38,8 @@ func init() {
 	configPath := flag.String("conf", "valerius.json", "Path to the config file.")
 	// parse flags
 	flag.Parse()
+	// setup log
+	log.SetFormatter(&log.JSONFormatter{})
 	// log to a file as well as stdout if the -log flag was set
 	if *logPath != "" {
 		logfile, err := os.OpenFile(*logPath, os.O_WRONLY|os.O_APPEND|os.O_CREATE, 0644)
@@ -46,7 +48,6 @@ func init() {
 		}
 		// set up the output and formatter
 		log.SetOutput(io.MultiWriter(os.Stdout, logfile))
-		log.SetFormatter(&log.JSONFormatter{})
 	}
 	// load bot config file
 	configFile, err := ioutil.ReadFile(*configPath)
