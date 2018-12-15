@@ -15,7 +15,7 @@ type IASIPCommand struct {
 }
 
 type IASIPConfig struct {
-	Trigger      string `json:"trigger"`
+	Prefix       string `json:"prefix"`
 	FontPath     string `json:"fontpath"`
 	ImageQuality int    `json:"Quality"`
 	TriggerRegex *regexp.Regexp
@@ -31,7 +31,7 @@ func NewIASIPCommand(config CommandConfig) (cmd IASIPCommand, err error) {
 	if err != nil {
 		return cmd, err
 	}
-	regex, err := regexp.Compile(options.Trigger)
+	regex, err := regexp.Compile("^" + options.Prefix + " (.*)$")
 	if err != nil {
 		return cmd, err
 	}

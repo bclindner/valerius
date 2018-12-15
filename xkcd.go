@@ -13,6 +13,11 @@ import (
 // The XKCDCommand base structure. Takes a Regexp to test the command.
 type XKCDCommand struct {
 	BaseCommand
+	XKCDConfig
+}
+
+type XKCDConfig struct {
+	Prefix string `json:"prefix"`
 	// Regexp to test with. This is set by the factory function.
 	regexp *regexp.Regexp
 }
@@ -33,18 +38,24 @@ type XKCDComic struct {
 
 // Generate a new XKCDCommand.
 func NewXKCDCommand(config CommandConfig) (command XKCDCommand, err error) {
-	// Instantiate the regex.
-	rgx, err := regexp.Compile(`^\!xkcd ?([0-9]+)?$`)
+	var options XKCDConfig
+	err = json.Unmarshal(config.Options, &options)
 	if err != nil {
-		return
+		return command, nil
 	}
+	// Instantiate the regex.
+	rgx, err := regexp.Compile(`^` + options.Prefix + ` ?([0-9]+)?$`)
+	if err != nil {
+		return command, nil
+	}
+	options.regexp = rgx
 	// generate the command
 	command = XKCDCommand{
 		BaseCommand: BaseCommand{
 			Name: config.Name,
 			Type: config.Name,
 		},
-		regexp: rgx,
+		XKCDConfig: options,
 	}
 	return
 }
