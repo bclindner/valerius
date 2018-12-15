@@ -17,7 +17,7 @@ It's best to learn by example here. This is an example config similar to the one
       "name": "Hello",
       "type": "pingpong",
       "options": {
-        "triggers": ["!hello"],
+        "trigger": "!hello",
         "response": "Hello world!"
       }
     },
