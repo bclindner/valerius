@@ -1,8 +1,10 @@
 config.json
+bclbot.json
 valerius.json
 valerius.log
 valerius
 valerius_*
+textile.ttf
 vendor/
 v0.*
 bin/
