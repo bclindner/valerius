@@ -14,7 +14,6 @@ type RegexPingPongCommand struct {
 }
 
 type RegexPingPongConfig struct {
-	Trigger string `json:"trigger"`
 	// Regular expression to test messages with.
 	Trigger string `json:"trigger"`
 	// Response message to send.
@@ -25,10 +24,6 @@ func NewRegexPingPongCommand(config CommandConfig) (command RegexPingPongCommand
 	// parse config
 	options := RegexPingPongConfig{}
 	err = json.Unmarshal(config.Options, &options)
-	if err != nil {
-		return
-	}
-	regex, err := regexp.Compile(options.Trigger)
 	if err != nil {
 		return
 	}
