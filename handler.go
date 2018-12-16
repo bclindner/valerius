@@ -2,7 +2,6 @@ package main
 
 import (
 	"encoding/json"
-	"errors"
 	"github.com/bwmarrin/discordgo"  // for running the bot
 	log "github.com/sirupsen/logrus" // logging suite
 )
@@ -19,11 +18,18 @@ type Command interface {
 	// commonly used to reply to or otherwise process a message.
 	// Returns an error that the handler can log.
 	Run(*discordgo.Session, *discordgo.MessageCreate) error
-	// Returns the whitelists and blacklists for the command.
-	GetChannelWhitelist() []string
-	GetChannelBlacklist() []string
-	GetGuildWhitelist() []string
-	GetGuildBlacklist() []string
+	// Checks if the command can be used on a given guild and channel ID.
+	Check(string, string) bool
+}
+
+// Checks if a list contains something.
+func listContains(list []string, id string) bool {
+	for _, listid := range list {
+		if listid == id {
+			return true
+		}
+	}
+	return false
 }
 
 // BaseCommand is the base command structure.
@@ -64,24 +70,21 @@ func (b BaseCommand) GetType() string {
 	return b.Type
 }
 
-// GetChannelWhitelist returns the list of channels that may use this command.
-func (b BaseCommand) GetChannelWhitelist() []string {
-	return b.ChannelWhitelist
-}
-
-// GetChannelBlacklist returns the list of channels that cannot use this command.
-func (b BaseCommand) GetChannelBlacklist() []string {
-	return b.ChannelBlacklist
-}
-
-// GetGuildWhitelist returns the list of guilds that may use this command.
-func (b BaseCommand) GetGuildWhitelist() []string {
-	return b.GuildWhitelist
-}
-
-// GetGuildBlacklist returns the list of guilds that cannot use this command.
-func (b BaseCommand) GetGuildBlacklist() []string {
-	return b.GuildBlacklist
+// Check ensures the command passes whitelist and blacklist checks.
+func (b BaseCommand) Check(guildID, channelID string) bool {
+	if len(b.ChannelWhitelist) > 0 && !listContains(b.ChannelWhitelist, channelID) {
+		return false
+	}
+	if len(b.ChannelBlacklist) > 0 && listContains(b.ChannelBlacklist, channelID) {
+		return false
+	}
+	if len(b.GuildWhitelist) > 0 && !listContains(b.GuildWhitelist, guildID) {
+		return false
+	}
+	if len(b.GuildBlacklist) > 0 && listContains(b.GuildBlacklist, guildID) {
+		return false
+	}
+	return true
 }
 
 // MessageHandler handles Discordgo messages, testing them against Valerius-compatible commands.
@@ -122,52 +125,8 @@ func (c *MessageHandler) Handle(bot *discordgo.Session, evt *discordgo.MessageCr
 	for _, cmd := range c.commands {
 		// Handle it as a goroutine to speed things up
 		go func(cmd Command) {
-			// Ensure the command is in guild whitelists, and not in blacklists
-			gwhitelist := cmd.GetGuildWhitelist()
-			if len(gwhitelist) > 0 {
-				guildok := false
-				for _, guild := range gwhitelist {
-					if guild == evt.Message.GuildID {
-						guildok = true
-						break
-					}
-				}
-				if !guildok {
-					return
-				}
-			}
-			gblacklist := cmd.GetGuildBlacklist()
-			if len(gblacklist) > 0 {
-				for _, guild := range gblacklist {
-					if guild == evt.Message.GuildID {
-						return
-					}
-				}
-			}
-			// Ensure the command is in channel whitelists, and not in blacklists
-			cwhitelist := cmd.GetChannelWhitelist()
-			if len(cwhitelist) > 0 {
-				chanok := false
-				for _, channel := range cwhitelist {
-					if channel == evt.Message.ChannelID {
-						chanok = true
-						break
-					}
-				}
-				if !chanok {
-					return
-				}
-			}
-			cblacklist := cmd.GetChannelBlacklist()
-			if len(cblacklist) > 0 {
-				for _, channel := range cblacklist {
-					if channel == evt.Message.ChannelID {
-						return
-					}
-				}
-			}
 			// Test the command
-			if cmd.Test(bot, evt) {
+			if cmd.Check(evt.Message.GuildID, evt.Message.ChannelID) && cmd.Test(bot, evt) {
 				// If it passed, log it,
 				author := *evt.Message.Author
 				log.WithFields(log.Fields{
@@ -197,12 +156,6 @@ func (c *MessageHandler) Handle(bot *discordgo.Session, evt *discordgo.MessageCr
 
 // Add commands to the handler, validating whitelists/blacklists as well.
 func (c *MessageHandler) Add(cmd Command) error {
-	if len(cmd.GetGuildBlacklist()) > 0 && len(cmd.GetGuildWhitelist()) > 0 {
-		return errors.New("can only have one GuildBlacklist or GuildWhitelist")
-	}
-	if len(cmd.GetChannelBlacklist()) > 0 && len(cmd.GetChannelWhitelist()) > 0 {
-		return errors.New("can only have one ChannelBlacklist or ChannelWhitelist")
-	}
 	c.commands = append(c.commands, cmd)
 	return nil
 }
