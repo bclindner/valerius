@@ -8,6 +8,7 @@ import (
 	"github.com/tidwall/gjson"      // for getting items in dot notation
 	"io/ioutil"                     // for opening response body
 	"net/http"
+	"net/url"
 	"regexp"
 )
 
@@ -90,7 +91,7 @@ func (r RESTCommand) Run(bot *discordgo.Session, evt *discordgo.MessageCreate) (
 	rgxgroups := r.regexp.FindAllStringSubmatch(evt.Message.Content, -1)[0]
 	var reqfmtgroups []interface{}
 	for _, i := range r.endpointgroups {
-		reqfmtgroups = append(reqfmtgroups, rgxgroups[i])
+		reqfmtgroups = append(reqfmtgroups, url.QueryEscape(rgxgroups[i]))
 	}
 	endpoint := fmt.Sprintf(r.endpointstring, reqfmtgroups...)
 	// Construct request based on this endpoint
