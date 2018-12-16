@@ -27,6 +27,8 @@ require (
 	github.com/spf13/cobra v0.0.3 // indirect
 	github.com/spf13/pflag v1.0.3 // indirect
 	github.com/stamblerre/gocode v0.0.0-20181128172141-22843d89bc5a // indirect
+	github.com/tidwall/gjson v1.1.3
+	github.com/tidwall/match v1.0.1 // indirect
 	github.com/zmb3/gogetdoc v0.0.0-20181120020305-71611d8dcf25 // indirect
 	golang.org/x/arch v0.0.0-20180920145803-b19384d3c130 // indirect
 	golang.org/x/lint v0.0.0-20181026193005-c67002cb31c3 // indirect

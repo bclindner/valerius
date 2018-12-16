@@ -95,14 +95,14 @@ func main() {
 				log.Fatal("Error with command "+config.Name+": ", err)
 			}
 			handler.Add(cmd)
-		case "xkcd":
-			cmd, err := NewXKCDCommand(config)
+		case "iasip":
+			cmd, err := NewIASIPCommand(config)
 			if err != nil {
 				log.Fatal("Error with command "+config.Name+": ", err)
 			}
 			handler.Add(cmd)
-		case "iasip":
-			cmd, err := NewIASIPCommand(config)
+		case "rest":
+			cmd, err := NewRESTCommand(config)
 			if err != nil {
 				log.Fatal("Error with command "+config.Name+": ", err)
 			}
