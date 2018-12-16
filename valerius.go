@@ -84,18 +84,27 @@ func main() {
 				log.Fatal("Error with command "+config.Name+": ", err)
 			}
 			handler.Add(cmd)
+			if err != nil {
+				log.Fatal("Error with command "+config.Name+": ", err)
+			}
 		case "iasip":
 			cmd, err := NewIASIPCommand(config)
 			if err != nil {
 				log.Fatal("Error with command "+config.Name+": ", err)
 			}
 			handler.Add(cmd)
+			if err != nil {
+				log.Fatal("Error with command "+config.Name+": ", err)
+			}
 		case "rest":
 			cmd, err := NewRESTCommand(config)
 			if err != nil {
 				log.Fatal("Error with command "+config.Name+": ", err)
 			}
 			handler.Add(cmd)
+			if err != nil {
+				log.Fatal("Error with command "+config.Name+": ", err)
+			}
 		default:
 			log.Fatal("Command " + config.Name + " is of invalid type (" + config.Type + "). Exiting.")
 		}
