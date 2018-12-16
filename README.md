@@ -76,6 +76,34 @@ It's best to learn by example here. This is an example config similar to the one
       }
     },
     {
+      "name": "Pokedex by name/number",
+      "type": "rest",
+      "options": {
+        "triggerregex": "^!pokemon ([\\-a-z]+|[0-9]+)$",
+        "endpoint": [
+          "https://pokeapi.co/api/v2/pokemon/%s/",
+          1
+        ],
+        "responses": [
+          [
+            "#%v %s (%s/%s): %s",
+            "id",
+            "name",
+            "types.0.type.name",
+            "types.1.type.name",
+            "sprites.front_default"
+          ],
+          [
+            "#%v %s (%s): %s",
+            "id",
+            "name",
+            "types.0.type.name",
+            "sprites.front_default"
+          ]
+        ]
+      }
+    },
+    {
       "name": "IASIP",
       "type": "iasip",
       "options": {
