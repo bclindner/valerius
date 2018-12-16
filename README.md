@@ -59,9 +59,20 @@ It's best to learn by example here. This is an example config similar to the one
     },
     {
       "name": "XKCD",
-      "type": "xkcd"
+      "type": "rest",
       "options": {
-        "prefix": "!xkcd",
+        "triggerregex": "^!xkcd ([0-9]+)$",
+        "endpoint": [
+          "http://xkcd.com/%s/info.0.json",
+          1
+        ],
+        "method": "GET",
+        "response": [
+          "XKCD %v: %v %v",
+          "num",
+          "safe_title",
+          "img"
+        ]
       }
     },
     {
