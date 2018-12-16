@@ -27,6 +27,7 @@ type RESTConfig struct {
 	Endpoint     []interface{} `json:"endpoint"`
 	Method       string        `json:"method"`
 	Response     []string      `json:"response"`
+	Responses    [][]string    `json:"responses"`
 }
 
 // NewRESTCommand generates a new RESTCommand.
@@ -35,6 +36,10 @@ func NewRESTCommand(config BaseCommand) (command RESTCommand, err error) {
 	err = json.Unmarshal(config.Options, &options)
 	if err != nil {
 		return command, nil
+	}
+	// Ensure there is only one of Response or Responses
+	if len(options.Response) > 0 && len(options.Responses) > 0 {
+		return command, errors.New("Can only have one of 'response' or 'responses'")
 	}
 	// Ensure the endpoint and response commands are of their correct types.
 	endpoint, ok := options.Endpoint[0].(string)
@@ -106,13 +111,41 @@ func (r RESTCommand) Run(bot *discordgo.Session, evt *discordgo.MessageCreate) (
 	if err != nil {
 		return errors.New("could not parse request body: " + err.Error())
 	}
-	// Get the JSON objects needed to format the response
-	var respfmtgroups []interface{}
-	items := gjson.GetManyBytes(body, r.Response[1:]...)
-	for _, item := range items {
-		respfmtgroups = append(respfmtgroups, item.Value())
+	// For single-response:
+	if len(r.Response) > 0 {
+		// Get the JSON objects needed to format the response
+		var respfmtgroups []interface{}
+		items := gjson.GetManyBytes(body, r.Response[1:]...)
+		for _, item := range items {
+			// Break if a particular lookup is missing
+			if !item.Exists() {
+				break
+			}
+			respfmtgroups = append(respfmtgroups, item.Value())
+		}
+		// Format and send the response
+		bot.ChannelMessageSend(evt.Message.ChannelID, fmt.Sprintf(r.Response[0], respfmtgroups...))
+		return nil
 	}
-	// Format and send the response
-	bot.ChannelMessageSend(evt.Message.ChannelID, fmt.Sprintf(r.Response[0], respfmtgroups...))
-	return nil
+	// For multi-response:
+	if len(r.Responses) > 0 {
+	ToNextResponse:
+		for _, response := range r.Responses {
+			// Get the JSON objects needed to format the response
+			var respfmtgroups []interface{}
+			items := gjson.GetManyBytes(body, response[1:]...)
+			for _, item := range items {
+				// Continue into the next response if a particular lookup is missing
+				if !item.Exists() {
+					continue ToNextResponse
+				}
+				respfmtgroups = append(respfmtgroups, item.Value())
+			}
+			// Format and send the response
+			bot.ChannelMessageSend(evt.Message.ChannelID, fmt.Sprintf(response[0], respfmtgroups...))
+			return nil
+		}
+	}
+	// If this code is reached, no response was valid, which probably shouldn't happen, so we'll throw an error
+	return errors.New("No valid response schema")
 }
