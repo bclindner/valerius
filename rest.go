@@ -30,7 +30,7 @@ type RESTConfig struct {
 }
 
 // NewRESTCommand generates a new RESTCommand.
-func NewRESTCommand(config CommandConfig) (command RESTCommand, err error) {
+func NewRESTCommand(config BaseCommand) (command RESTCommand, err error) {
 	var options RESTConfig
 	err = json.Unmarshal(config.Options, &options)
 	if err != nil {
@@ -64,10 +64,7 @@ func NewRESTCommand(config CommandConfig) (command RESTCommand, err error) {
 	}
 	// generate the command
 	command = RESTCommand{
-		BaseCommand: BaseCommand{
-			Name: config.Name,
-			Type: config.Name,
-		},
+		BaseCommand:    config,
 		RESTConfig:     options,
 		regexp:         rgx,
 		endpointstring: endpoint,

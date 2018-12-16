@@ -1,6 +1,7 @@
 package main
 
 import (
+	"encoding/json"
 	"github.com/bwmarrin/discordgo"  // for running the bot
 	log "github.com/sirupsen/logrus" // logging suite
 )
@@ -20,14 +21,19 @@ type Command interface {
 }
 
 // BaseCommand is the base command structure.
+// It also serves as the schema
 type BaseCommand struct {
 	Command
 	// Human-readable name of the command, for logging purposes.
 	// In the handler, This is retrieved through GetName().
-	Name string
+	Name string `json:"name"`
 	// Human-readable type of the command, for logging purposes.
 	// In the handler, This is retrieved through GetType().
-	Type string
+	Type string `json:"type"`
+	// JSON-encoded list of options for the command.
+	// This is intended to be parsed and handled by the "NewXCommand" factory function
+	// after utilizing this BaseCommand.
+	Options json.RawMessage
 }
 
 // GetName prints the set name of the BaseCommand.

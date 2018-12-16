@@ -59,7 +59,7 @@ type PingPongConfig struct {
 }
 
 // NewPingPongCommand creates a new PingPongCommand.
-func NewPingPongCommand(config CommandConfig) (command PingPongCommand, err error) {
+func NewPingPongCommand(config BaseCommand) (command PingPongCommand, err error) {
 	// Parse config
 	options := PingPongConfig{}
 	err = json.Unmarshal(config.Options, &options)
@@ -99,10 +99,7 @@ func NewPingPongCommand(config CommandConfig) (command PingPongCommand, err erro
 	}
 	// Initialize command
 	command = PingPongCommand{
-		BaseCommand: BaseCommand{
-			Name: config.Name,
-			Type: config.Type,
-		},
+		BaseCommand:    config,
 		PingPongConfig: options,
 		TriggerType:    ttype,
 		ResponseType:   rtype,

@@ -33,7 +33,7 @@ type IASIPConfig struct {
 }
 
 // NewIASIPCommand generates a new IASIPCommand.
-func NewIASIPCommand(config CommandConfig) (cmd IASIPCommand, err error) {
+func NewIASIPCommand(config BaseCommand) (cmd IASIPCommand, err error) {
 	options := IASIPConfig{}
 	err = json.Unmarshal(config.Options, &options)
 	if err != nil {
@@ -49,10 +49,7 @@ func NewIASIPCommand(config CommandConfig) (cmd IASIPCommand, err error) {
 	}
 	options.TriggerRegex = regex
 	cmd = IASIPCommand{
-		BaseCommand: BaseCommand{
-			Name: config.Name,
-			Type: config.Type,
-		},
+		BaseCommand: config,
 		IASIPConfig: options,
 	}
 	return cmd, nil
