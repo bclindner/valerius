@@ -4,9 +4,10 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"github.com/bwmarrin/discordgo" // for running the bot
-	"github.com/tidwall/gjson"      // for getting items in dot notation
-	"io/ioutil"                     // for opening response body
+	"github.com/bwmarrin/discordgo"  // for running the bot
+	log "github.com/sirupsen/logrus" // logging suite
+	"github.com/tidwall/gjson"       // for getting items in dot notation
+	"io/ioutil"                      // for opening response body
 	"net/http"
 	"net/url"
 	"regexp"
@@ -99,6 +100,11 @@ func (r RESTCommand) Run(bot *discordgo.Session, evt *discordgo.MessageCreate) (
 	if err != nil {
 		return err
 	}
+	// Log that we're about to send the request, in case someone's trying something nasty
+	log.WithFields(log.Fields{
+		"endpoint": endpoint,
+		"method":   r.Method,
+	}).Info("Making HTTP request")
 	// Send request, ensure nothing failed, get JSON bytes
 	resp, err := r.client.Do(request)
 	if err != nil {
@@ -107,6 +113,11 @@ func (r RESTCommand) Run(bot *discordgo.Session, evt *discordgo.MessageCreate) (
 	if resp.StatusCode >= 400 {
 		return errors.New("request failed with status " + resp.Status)
 	}
+	// Log some response metadata, again, in case someone's being nasty
+	log.WithFields(log.Fields{
+		"endpoint": endpoint,
+		"response": resp.Status,
+	}).Info("HTTP request result")
 	defer resp.Body.Close()
 	body, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
