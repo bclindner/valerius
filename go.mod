@@ -3,7 +3,7 @@ module gitlab.com/bclindner/valerius/v0.3
 require (
 	github.com/alecthomas/gometalinter v2.0.12+incompatible // indirect
 	github.com/alecthomas/units v0.0.0-20151022065526-2efee857e7cf // indirect
-	github.com/bclindner/iasipgenerator v0.0.0-20181215041843-992a05812300
+	github.com/bclindner/iasipgenerator v0.0.0-20181217195122-d337ee89954c
 	github.com/bwmarrin/discordgo v0.19.0
 	github.com/cosiner/argv v0.0.1 // indirect
 	github.com/davidrjenni/reftools v0.0.0-20180914123528-654d0ba4f96d // indirect
@@ -32,9 +32,9 @@ require (
 	github.com/zmb3/gogetdoc v0.0.0-20181208215853-c5ca8f4d4936 // indirect
 	golang.org/x/arch v0.0.0-20181203225421-5a4828bb7045 // indirect
 	golang.org/x/crypto v0.0.0-20181203042331-505ab145d0a9 // indirect
-	golang.org/x/lint v0.0.0-20181212231659-93c0bb5c8393 // indirect
+	golang.org/x/lint v0.0.0-20181217174547-8f45f776aaf1 // indirect
 	golang.org/x/sys v0.0.0-20181213200352-4d1cda033e06 // indirect
-	golang.org/x/tools v0.0.0-20181214171254-3c39ce7b6105 // indirect
+	golang.org/x/tools v0.0.0-20181217182337-728ed46ae025 // indirect
 	gopkg.in/alecthomas/kingpin.v3-unstable v3.0.0-20180810215634-df19058c872c // indirect
 	gopkg.in/check.v1 v1.0.0-20180628173108-788fd7840127 // indirect
 	gopkg.in/yaml.v2 v2.2.2 // indirect

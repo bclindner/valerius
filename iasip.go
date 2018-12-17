@@ -43,7 +43,7 @@ func NewIASIPCommand(config BaseCommand) (cmd IASIPCommand, err error) {
 	if err != nil {
 		return cmd, err
 	}
-	regex, err := regexp.Compile("^" + options.Prefix + " (.*)$")
+	regex, err := regexp.Compile(`^` + options.Prefix + ` ([\S\s]*)$`)
 	if err != nil {
 		return cmd, err
 	}
