@@ -15,6 +15,8 @@ import (
 type BotConfiguration struct {
 	// Token that the bot logs in with.
 	BotToken string `json:"botToken"`
+	// Bot status message (when initialized).
+	Status string `json:"status"`
 	// List of commands to try and create.
 	Commands []BaseCommand `json:"commands"`
 }
@@ -111,6 +113,13 @@ func main() {
 	}
 	// open the bot to be used
 	bot.Open()
+	// set our status
+	if len(config.Status) > 0 {
+		err = bot.UpdateStatus(0, config.Status)
+		if err != nil {
+			log.Error("Error setting status:", err)
+		}
+	}
 	// wait for OS interrupt (ctrl-c or a kill or something)
 	sig := make(chan os.Signal, 1)
 	signal.Notify(sig, os.Interrupt, os.Kill)
