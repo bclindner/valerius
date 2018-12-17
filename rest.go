@@ -30,6 +30,7 @@ type RESTConfig struct {
 	Method       string        `json:"method"`
 	Response     []string      `json:"response"`
 	Responses    [][]string    `json:"responses"`
+	ErrorMessage string        `json:"errorMessage"`
 }
 
 // NewRESTCommand generates a new RESTCommand.
@@ -81,6 +82,12 @@ func NewRESTCommand(config BaseCommand) (command RESTCommand, err error) {
 	return command, nil
 }
 
+func (r RESTCommand) SendErrorMessage(bot *discordgo.Session, evt *discordgo.MessageCreate) {
+	if len(r.ErrorMessage) > 0 {
+		bot.ChannelMessageSend(evt.Message.ChannelID, r.ErrorMessage)
+	}
+}
+
 // Test ensures the compiled regex passes.
 func (r RESTCommand) Test(bot *discordgo.Session, evt *discordgo.MessageCreate) bool {
 	return r.regexp.MatchString(evt.Message.Content)
@@ -98,6 +105,7 @@ func (r RESTCommand) Run(bot *discordgo.Session, evt *discordgo.MessageCreate) (
 	// Construct request based on this endpoint
 	request, err := http.NewRequest(r.Method, endpoint, nil)
 	if err != nil {
+		r.SendErrorMessage(bot, evt)
 		return err
 	}
 	// Log that we're about to send the request, in case someone's trying something nasty
@@ -108,19 +116,22 @@ func (r RESTCommand) Run(bot *discordgo.Session, evt *discordgo.MessageCreate) (
 	// Send request, ensure nothing failed, get JSON bytes
 	resp, err := r.client.Do(request)
 	if err != nil {
+		r.SendErrorMessage(bot, evt)
 		return errors.New("could not make request: " + err.Error())
-	}
-	if resp.StatusCode >= 400 {
-		return errors.New("request failed with status " + resp.Status)
 	}
 	// Log some response metadata, again, in case someone's being nasty
 	log.WithFields(log.Fields{
 		"endpoint": endpoint,
 		"response": resp.Status,
 	}).Info("HTTP request result")
+	if resp.StatusCode >= 400 {
+		r.SendErrorMessage(bot, evt)
+		return errors.New("request failed with status " + resp.Status)
+	}
 	defer resp.Body.Close()
 	body, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
+		r.SendErrorMessage(bot, evt)
 		return errors.New("could not parse request body: " + err.Error())
 	}
 	// For single-response:
@@ -159,5 +170,6 @@ func (r RESTCommand) Run(bot *discordgo.Session, evt *discordgo.MessageCreate) (
 		}
 	}
 	// If this code is reached, no response was valid, which probably shouldn't happen, so we'll throw an error
+	r.SendErrorMessage(bot, evt)
 	return errors.New("No valid response schema")
 }
