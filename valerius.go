@@ -1,7 +1,8 @@
 package main
 
 import (
-	"encoding/json"                  // for parsing config file
+	"encoding/json" // for parsing config file
+	"errors"
 	"flag"                           // for parsing args at runtime
 	"github.com/bwmarrin/discordgo"  // for running the bot
 	log "github.com/sirupsen/logrus" // logging suite
@@ -21,12 +22,14 @@ type BotConfiguration struct {
 	Commands []BaseCommand `json:"commands"`
 }
 
-var config BotConfiguration
+var (
+	config     BotConfiguration
+	handler    *MessageHandler
+	logPath    = flag.String("log", "", "Path to the logfile, if used.")
+	configPath = flag.String("conf", "valerius.json", "Path to the config file.")
+)
 
 func init() {
-	// set up flags
-	logPath := flag.String("log", "", "Path to the logfile, if used.")
-	configPath := flag.String("conf", "valerius.json", "Path to the config file.")
 	// parse flags
 	flag.Parse()
 	// setup log
@@ -40,15 +43,12 @@ func init() {
 		// set up the output and formatter
 		log.SetOutput(io.MultiWriter(os.Stdout, logfile))
 	}
-	// load bot config file
-	configFile, err := ioutil.ReadFile(*configPath)
+	// have to set err here so config goes in as a global var, 'cuz Go
+	// (this is probably the wrong way to do it, though)
+	var err error
+	config, err = ReadBotConfig(*configPath)
 	if err != nil {
-		log.Fatal("Unable to read config file: ", err)
-	}
-	// parse bot config file
-	err = json.Unmarshal(configFile, &config)
-	if err != nil {
-		log.Fatal("Unable to read config file: ", err)
+		log.Fatal(err)
 	}
 }
 
@@ -67,6 +67,21 @@ func initBot() (bot *discordgo.Session, err error) {
 	return
 }
 
+// ReadBotConfig reads a config file from a path and parses it into a BotConfiguration.
+func ReadBotConfig(path string) (config BotConfiguration, err error) {
+	// load bot config file
+	configFile, err := ioutil.ReadFile(path)
+	if err != nil {
+		return config, errors.New("Unable to read config file: " + err.Error())
+	}
+	// parse bot config file
+	err = json.Unmarshal(configFile, &config)
+	if err != nil {
+		return config, errors.New("Unable to read config file: " + err.Error())
+	}
+	return config, nil
+}
+
 func main() {
 	// initialize the bot
 	bot, err := initBot()
@@ -74,42 +89,10 @@ func main() {
 		log.Fatal("Failed to initialize bot: ", err)
 	}
 	defer bot.Close()
-	// instantiate and register the handler
-	handler := NewMessageHandler(bot)
-	// add handler commands
-	for _, config := range config.Commands {
-		// TODO find a cleaner way to register commands
-		switch config.Type {
-		case "pingpong":
-			cmd, err := NewPingPongCommand(config)
-			if err != nil {
-				log.Fatal("Error with command "+config.Name+": ", err)
-			}
-			handler.Add(cmd)
-			if err != nil {
-				log.Fatal("Error with command "+config.Name+": ", err)
-			}
-		case "iasip":
-			cmd, err := NewIASIPCommand(config)
-			if err != nil {
-				log.Fatal("Error with command "+config.Name+": ", err)
-			}
-			handler.Add(cmd)
-			if err != nil {
-				log.Fatal("Error with command "+config.Name+": ", err)
-			}
-		case "rest":
-			cmd, err := NewRESTCommand(config)
-			if err != nil {
-				log.Fatal("Error with command "+config.Name+": ", err)
-			}
-			handler.Add(cmd)
-			if err != nil {
-				log.Fatal("Error with command "+config.Name+": ", err)
-			}
-		default:
-			log.Fatal("Command " + config.Name + " is of invalid type (" + config.Type + "). Exiting.")
-		}
+	// instantiate the handler
+	handler, err = NewMessageHandler(bot, config.Commands)
+	if err != nil {
+		log.Fatal(err)
 	}
 	// open the bot to be used
 	bot.Open()

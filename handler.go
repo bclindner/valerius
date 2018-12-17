@@ -2,6 +2,7 @@ package main
 
 import (
 	"encoding/json"
+	"errors"
 	"github.com/bwmarrin/discordgo"  // for running the bot
 	log "github.com/sirupsen/logrus" // logging suite
 )
@@ -105,6 +106,8 @@ type MessageHandler struct {
 	Handler
 	// List of commands to test.
 	commands []Command
+	// Command to disconnect the handler from the bot.
+	DestroySelf func()
 }
 
 // Handler is the interface for the bot message handler.
@@ -115,10 +118,39 @@ type Handler interface {
 }
 
 // NewMessageHandler creates a new handler and binds it to a Session.
-func NewMessageHandler(bot *discordgo.Session) *MessageHandler {
+func NewMessageHandler(bot *discordgo.Session, commands []BaseCommand) (*MessageHandler, error) {
 	handler := MessageHandler{}
-	bot.AddHandler(handler.Handle)
-	return &handler
+	// set variables for use in the loop
+	var (
+		err error
+		cmd Command
+	)
+	// add handler commands
+	for _, config := range commands {
+		switch config.Type {
+		case "pingpong":
+			cmd, err = NewPingPongCommand(config)
+		case "iasip":
+			cmd, err = NewIASIPCommand(config)
+		case "rest":
+			cmd, err = NewRESTCommand(config)
+		case "reload":
+			cmd, err = NewReloadCommand(config)
+		default:
+			return &handler, errors.New("Command " + config.Name + " is of invalid type (" + config.Type + "). Exiting.")
+		}
+		// handle any errors
+		if err != nil {
+			return &handler, errors.New("Error with command " + config.Name + ": " + err.Error())
+		}
+		// add the command
+		handler.Add(cmd)
+	}
+	// log how many commands we parsed
+	log.Info("Parsed ", len(handler.commands), " commands")
+	// register self with the bot, and get the function necessary to detach from bot
+	handler.DestroySelf = bot.AddHandler(handler.Handle)
+	return &handler, nil
 }
 
 // Handle handles a Discord message. This just runs the Test() function of each command,
@@ -171,7 +203,6 @@ func (c *MessageHandler) Handle(bot *discordgo.Session, evt *discordgo.MessageCr
 }
 
 // Add commands to the handler, validating whitelists/blacklists as well.
-func (c *MessageHandler) Add(cmd Command) error {
+func (c *MessageHandler) Add(cmd Command) {
 	c.commands = append(c.commands, cmd)
-	return nil
 }
