@@ -4,7 +4,8 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"github.com/bwmarrin/discordgo"  // for running the bot
+	"github.com/bwmarrin/discordgo" // for running the bot
+	"github.com/gregjones/httpcache"
 	log "github.com/sirupsen/logrus" // logging suite
 	"github.com/tidwall/gjson"       // for getting items in dot notation
 	"io/ioutil"                      // for opening response body
@@ -78,7 +79,10 @@ func NewRESTCommand(config BaseCommand) (command RESTCommand, err error) {
 		regexp:         rgx,
 		endpointstring: endpoint,
 		endpointgroups: endpointgroups,
-		client:         http.Client{},
+		client: http.Client{
+			// use a caching transport to stop the bot from flooding servers with identical requests
+			Transport: httpcache.NewMemoryCacheTransport(),
+		},
 	}
 	return command, nil
 }
