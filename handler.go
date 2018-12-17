@@ -19,7 +19,7 @@ type Command interface {
 	// Returns an error that the handler can log.
 	Run(*discordgo.Session, *discordgo.MessageCreate) error
 	// Checks if the command can be used on a given guild and channel ID.
-	Check(string, string) bool
+	Check(guildID string, channelID string, userID string) bool
 }
 
 // Checks if a list contains something.
@@ -45,15 +45,21 @@ type BaseCommand struct {
 	// Optional channel whitelist.
 	// If set, only channels in this list can use this command.
 	ChannelWhitelist []string `json:"channelwhitelist"`
-	// Optional channel blacklist.
+	// Optional channel whitelist.
 	// If set, channels in this list cannot use this command.
 	ChannelBlacklist []string `json:"channelblacklist"`
 	// Optional guild blacklist.
 	// If set, guilds in this list cannot use this command.
-	GuildWhitelist []string `json:"guildblacklist"`
-	// Optional guild blacklist.
+	GuildWhitelist []string `json:"guildwhitelist"`
+	// Optional guild whitelist.
 	// If set, guilds in this list cannot use this command.
-	GuildBlacklist []string `json:"guildwhitelist"`
+	GuildBlacklist []string `json:"guildblacklist"`
+	// Optional user whitelist.
+	// If set, users in this list cannot use this command.
+	UserWhitelist []string `json:"userwhitelist"`
+	// Optional user blacklist.
+	// If set, users in this list cannot use this command.
+	UserBlacklist []string `json:"userblacklist"`
 	// JSON-encoded list of options for the command.
 	// This is intended to be parsed and handled by the "NewXCommand" factory function
 	// after utilizing this BaseCommand.
@@ -71,7 +77,7 @@ func (b BaseCommand) GetType() string {
 }
 
 // Check ensures the command passes whitelist and blacklist checks.
-func (b BaseCommand) Check(guildID, channelID string) bool {
+func (b BaseCommand) Check(guildID, channelID, userID string) bool {
 	if len(b.ChannelWhitelist) > 0 && !listContains(b.ChannelWhitelist, channelID) {
 		return false
 	}
@@ -82,6 +88,12 @@ func (b BaseCommand) Check(guildID, channelID string) bool {
 		return false
 	}
 	if len(b.GuildBlacklist) > 0 && listContains(b.GuildBlacklist, guildID) {
+		return false
+	}
+	if len(b.UserWhitelist) > 0 && !listContains(b.UserWhitelist, userID) {
+		return false
+	}
+	if len(b.UserBlacklist) > 0 && listContains(b.UserBlacklist, userID) {
 		return false
 	}
 	return true
@@ -126,27 +138,31 @@ func (c *MessageHandler) Handle(bot *discordgo.Session, evt *discordgo.MessageCr
 		// Handle it as a goroutine to speed things up
 		go func(cmd Command) {
 			// Test the command
-			if cmd.Check(evt.Message.GuildID, evt.Message.ChannelID) && cmd.Test(bot, evt) {
+			if cmd.Check(evt.Message.GuildID, evt.Message.ChannelID, evt.Message.Author.ID) && cmd.Test(bot, evt) {
 				// If it passed, log it,
 				author := *evt.Message.Author
 				log.WithFields(log.Fields{
-					"text":     evt.Message.Content,
-					"command":  cmd.GetName(),
-					"type":     cmd.GetType(),
-					"userID":   author.ID,
-					"username": author.Username + "#" + author.Discriminator,
+					"text":      evt.Message.Content,
+					"command":   cmd.GetName(),
+					"type":      cmd.GetType(),
+					"userID":    author.ID,
+					"username":  author.Username + "#" + author.Discriminator,
+					"guildID":   evt.Message.GuildID,
+					"channelID": evt.Message.ChannelID,
 				}).Info("Command fired")
 				// and run the command
 				err := cmd.Run(bot, evt)
 				if err != nil {
 					// Log if it failed, too
 					log.WithFields(log.Fields{
-						"text":     evt.Message.Content,
-						"command":  cmd.GetName(),
-						"type":     cmd.GetType(),
-						"userID":   author.ID,
-						"username": author.Username + "#" + author.Discriminator,
-						"error":    err,
+						"text":      evt.Message.Content,
+						"command":   cmd.GetName(),
+						"type":      cmd.GetType(),
+						"userID":    author.ID,
+						"guildID":   evt.Message.GuildID,
+						"channelID": evt.Message.ChannelID,
+						"username":  author.Username + "#" + author.Discriminator,
+						"error":     err,
 					}).Error("Command failed")
 				}
 			}
