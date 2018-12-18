@@ -24,7 +24,7 @@ type BotConfiguration struct {
 
 var (
 	config     BotConfiguration
-	handler    *MessageHandler
+	handler    *Handler
 	logPath    = flag.String("log", "", "Path to the logfile, if used.")
 	configPath = flag.String("conf", "valerius.json", "Path to the config file.")
 )
@@ -90,7 +90,7 @@ func main() {
 	}
 	defer bot.Close()
 	// instantiate the handler
-	handler, err = NewMessageHandler(bot, config.Commands)
+	handler, err = NewHandler(bot, config.Commands)
 	if err != nil {
 		log.Fatal(err)
 	}

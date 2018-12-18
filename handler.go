@@ -100,26 +100,18 @@ func (b BaseCommand) Check(guildID, channelID, userID string) bool {
 	return true
 }
 
-// MessageHandler handles Discordgo messages, testing them against Valerius-compatible commands.
+// The Handler handles Discordgo messages, testing them against Valerius-compatible commands.
 // The struct itself only contains the list of commands.
-type MessageHandler struct {
-	Handler
+type Handler struct {
 	// List of commands to test.
 	commands []Command
 	// Command to disconnect the handler from the bot.
 	DestroySelf func()
 }
 
-// Handler is the interface for the bot message handler.
-// Has Handle and Add functions that handle commands and add new ones.
-type Handler interface {
-	// Handle a Discord command.
-	Handle(*discordgo.Session, *discordgo.MessageCreate)
-}
-
-// NewMessageHandler creates a new handler and binds it to a Session.
-func NewMessageHandler(bot *discordgo.Session, commands []BaseCommand) (*MessageHandler, error) {
-	handler := MessageHandler{}
+// NewHandler creates a new handler and binds it to a Session.
+func NewHandler(bot *discordgo.Session, commands []BaseCommand) (*Handler, error) {
+	handler := Handler{}
 	// set variables for use in the loop
 	var (
 		err error
@@ -156,7 +148,7 @@ func NewMessageHandler(bot *discordgo.Session, commands []BaseCommand) (*Message
 // Handle handles a Discord message. This just runs the Test() function of each command,
 // and if a command's test passes, the handler calls its Run() function, logging
 // the action as well.
-func (c *MessageHandler) Handle(bot *discordgo.Session, evt *discordgo.MessageCreate) {
+func (c *Handler) Handle(bot *discordgo.Session, evt *discordgo.MessageCreate) {
 	// Run preliminary tests: is the user sending the message a bot?
 	if evt.Message.Author.Bot {
 		return
@@ -203,6 +195,6 @@ func (c *MessageHandler) Handle(bot *discordgo.Session, evt *discordgo.MessageCr
 }
 
 // Add commands to the handler, validating whitelists/blacklists as well.
-func (c *MessageHandler) Add(cmd Command) {
+func (c *Handler) Add(cmd Command) {
 	c.commands = append(c.commands, cmd)
 }

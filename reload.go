@@ -49,7 +49,7 @@ func (c ReloadCommand) Run(bot *discordgo.Session, evt *discordgo.MessageCreate)
 		return err
 	}
 	// Try to make the new handler
-	newhandler, err := NewMessageHandler(bot, config.Commands)
+	newhandler, err := NewHandler(bot, config.Commands)
 	if err != nil {
 		bot.ChannelMessageSend(evt.Message.ChannelID, "Failed to reload commands.")
 		return err
