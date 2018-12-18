@@ -1,17 +1,18 @@
 package main
 
 import (
+	"bytes"
 	"encoding/json"
 	"errors"
 	"fmt"
 	"github.com/bwmarrin/discordgo" // for running the bot
 	"github.com/gregjones/httpcache"
 	log "github.com/sirupsen/logrus" // logging suite
-	"github.com/tidwall/gjson"       // for getting items in dot notation
 	"io/ioutil"                      // for opening response body
 	"net/http"
 	"net/url"
 	"regexp"
+	"text/template"
 )
 
 // RESTCommand base structure.
@@ -21,19 +22,20 @@ type RESTCommand struct {
 	regexp         *regexp.Regexp
 	endpointstring string
 	endpointgroups []int
+	template       *template.Template
 	client         http.Client
 }
 
 // RESTConfig is the configuration for the RESTCommand.
 type RESTConfig struct {
-	TriggerRegex string            `json:"triggerregex"`
-	Endpoint     []interface{}     `json:"endpoint"`
-	Method       string            `json:"method"`
-	Response     []string          `json:"response"`
-	Responses    [][]string        `json:"responses"`
-	ErrorMessage string            `json:"errorMessage"`
-	Headers      map[string]string `json:"headers"`
-	DisableCache bool              `json:"disablecache"`
+	TriggerRegex     string            `json:"triggerregex"`
+	Endpoint         []interface{}     `json:"endpoint"`
+	Method           string            `json:"method"`
+	Response         string            `json:"response"`
+	ResponseFilepath string            `json:"responseFile"`
+	ErrorMessage     string            `json:"errorMessage"`
+	Headers          map[string]string `json:"headers"`
+	DisableCache     bool              `json:"disablecache"`
 }
 
 // NewRESTCommand generates a new RESTCommand.
@@ -43,9 +45,25 @@ func NewRESTCommand(config BaseCommand) (command RESTCommand, err error) {
 	if err != nil {
 		return command, nil
 	}
-	// Ensure there is only one of Response or Responses
-	if len(options.Response) > 0 && len(options.Responses) > 0 {
-		return command, errors.New("Can only have one of 'response' or 'responses'")
+	// Ensure only one of Response and ResponseFilepath is set
+	if len(options.Response) > 0 && len(options.ResponseFilepath) > 0 {
+		return command, errors.New("Can only have one of response and responseFile")
+	}
+	// Get template text to use
+	var tmplstr string
+	if len(options.Response) > 0 {
+		tmplstr = options.Response
+	} else {
+		tmplbytes, err := ioutil.ReadFile(options.ResponseFilepath)
+		if err != nil {
+			return command, errors.New("Error reading response file: " + err.Error())
+		}
+		tmplstr = string(tmplbytes)
+	}
+	// Compile the template
+	tmpl, err := template.New(config.Name).Parse(tmplstr)
+	if err != nil {
+		return command, errors.New("Failed to compile template: " + err.Error())
 	}
 	// Ensure the endpoint and response commands are of their correct types.
 	endpoint, ok := options.Endpoint[0].(string)
@@ -80,6 +98,7 @@ func NewRESTCommand(config BaseCommand) (command RESTCommand, err error) {
 		regexp:         rgx,
 		endpointstring: endpoint,
 		endpointgroups: endpointgroups,
+		template:       tmpl,
 	}
 	// set the client based on if this restcommand is cached
 	if options.DisableCache {
@@ -148,44 +167,21 @@ func (r RESTCommand) Run(bot *discordgo.Session, evt *discordgo.MessageCreate) (
 	body, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
 		r.sendErrorMessage(bot, evt)
-		return errors.New("could not parse request body: " + err.Error())
+		return errors.New("could not read request body: " + err.Error())
 	}
-	// For single-response:
-	if len(r.Response) > 0 {
-		// Get the JSON objects needed to format the response
-		var respfmtgroups []interface{}
-		items := gjson.GetManyBytes(body, r.Response[1:]...)
-		for _, item := range items {
-			// Break if a particular lookup is missing
-			if !item.Exists() {
-				break
-			}
-			respfmtgroups = append(respfmtgroups, item.Value())
-		}
-		// Format and send the response
-		bot.ChannelMessageSend(evt.Message.ChannelID, fmt.Sprintf(r.Response[0], respfmtgroups...))
-		return nil
+	// Unmarshal the response JSON into an interface{}
+	var bodyjson interface{}
+	err = json.Unmarshal(body, &bodyjson)
+	if err != nil {
+		r.sendErrorMessage(bot, evt)
+		return errors.New("could not unmarshal request body: " + err.Error())
 	}
-	// For multi-response:
-	if len(r.Responses) > 0 {
-	ToNextResponse:
-		for _, response := range r.Responses {
-			// Get the JSON objects needed to format the response
-			var respfmtgroups []interface{}
-			items := gjson.GetManyBytes(body, response[1:]...)
-			for _, item := range items {
-				// Continue into the next response if a particular lookup is missing
-				if !item.Exists() {
-					continue ToNextResponse
-				}
-				respfmtgroups = append(respfmtgroups, item.Value())
-			}
-			// Format and send the response
-			bot.ChannelMessageSend(evt.Message.ChannelID, fmt.Sprintf(response[0], respfmtgroups...))
-			return nil
-		}
+	msgbuf := new(bytes.Buffer)
+	err = r.template.Execute(msgbuf, bodyjson)
+	if err != nil {
+		r.sendErrorMessage(bot, evt)
+		return errors.New("could not execute template: " + err.Error())
 	}
-	// If this code is reached, no response was valid, which probably shouldn't happen, so we'll throw an error
-	r.sendErrorMessage(bot, evt)
-	return errors.New("No valid response schema")
+	bot.ChannelMessageSend(evt.Message.ChannelID, msgbuf.String())
+	return nil
 }
