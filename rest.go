@@ -28,13 +28,14 @@ type RESTCommand struct {
 
 // RESTConfig is the configuration for the RESTCommand.
 type RESTConfig struct {
-	TriggerRegex string            `json:"triggerregex"`
-	Endpoint     []interface{}     `json:"endpoint"`
-	Method       string            `json:"method"`
-	Response     string            `json:"response"`
-	ErrorMessage string            `json:"errorMessage"`
-	Headers      map[string]string `json:"headers"`
-	DisableCache bool              `json:"disablecache"`
+	TriggerRegex     string            `json:"triggerregex"`
+	Endpoint         []interface{}     `json:"endpoint"`
+	Method           string            `json:"method"`
+	Response         string            `json:"response"`
+	ResponseFilepath string            `json:"responseFile"`
+	ErrorMessage     string            `json:"errorMessage"`
+	Headers          map[string]string `json:"headers"`
+	DisableCache     bool              `json:"disablecache"`
 }
 
 // NewRESTCommand generates a new RESTCommand.
@@ -44,8 +45,23 @@ func NewRESTCommand(config BaseCommand) (command RESTCommand, err error) {
 	if err != nil {
 		return command, nil
 	}
+	// Ensure only one of Response and ResponseFilepath is set
+	if len(options.Response) > 0 && len(options.ResponseFilepath) > 0 {
+		return command, errors.New("Can only have one of response and responseFile")
+	}
+	// Get template text to use
+	var tmplstr string
+	if len(options.Response) > 0 {
+		tmplstr = options.Response
+	} else {
+		tmplbytes, err := ioutil.ReadFile(options.ResponseFilepath)
+		if err != nil {
+			return command, errors.New("Error reading response file: " + err.Error())
+		}
+		tmplstr = string(tmplbytes)
+	}
 	// Compile the template
-	tmpl, err := template.New(config.Name).Parse(options.Response)
+	tmpl, err := template.New(config.Name).Parse(tmplstr)
 	if err != nil {
 		return command, errors.New("Failed to compile template: " + err.Error())
 	}
