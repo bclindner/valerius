@@ -33,6 +33,7 @@ type RESTConfig struct {
 	Responses    [][]string        `json:"responses"`
 	ErrorMessage string            `json:"errorMessage"`
 	Headers      map[string]string `json:"headers"`
+	DisableCache bool              `json:"disablecache"`
 }
 
 // NewRESTCommand generates a new RESTCommand.
@@ -79,10 +80,16 @@ func NewRESTCommand(config BaseCommand) (command RESTCommand, err error) {
 		regexp:         rgx,
 		endpointstring: endpoint,
 		endpointgroups: endpointgroups,
-		client: http.Client{
-			// use a caching transport to stop the bot from flooding servers with identical requests
+	}
+	// set the client based on if this restcommand is cached
+	if options.DisableCache {
+		command.client = http.Client{}
+	} else {
+		// use a caching transport to stop the bot from flooding servers with identical requests, if the config allows
+		command.client = http.Client{
 			Transport: httpcache.NewMemoryCacheTransport(),
-		},
+		}
+		command.client = http.Client{}
 	}
 	return command, nil
 }
