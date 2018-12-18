@@ -10,6 +10,8 @@ github.com/bclindner/iasipgenerator v0.0.0-20181215041843-992a05812300 h1:y+bqlL
 github.com/bclindner/iasipgenerator v0.0.0-20181215041843-992a05812300/go.mod h1:sqvGzUcCr3RHiTD+tB2vPDlkw4KgZKU6AJDnf1K/phU=
 github.com/bclindner/iasipgenerator v0.0.0-20181217195122-d337ee89954c h1:PObpo7aM3l4G0wbCqYIfWFFp31DbtQzihrUV1Kpx8gk=
 github.com/bclindner/iasipgenerator v0.0.0-20181217195122-d337ee89954c/go.mod h1:sqvGzUcCr3RHiTD+tB2vPDlkw4KgZKU6AJDnf1K/phU=
+github.com/bclindner/iasipgenerator v0.0.0-20181218024440-9e995f4ca2d0 h1:VTAmmNtZ9U1LgsOMFC9BB30LwHRGP9lblTzI8KqF1s0=
+github.com/bclindner/iasipgenerator v0.0.0-20181218024440-9e995f4ca2d0/go.mod h1:sqvGzUcCr3RHiTD+tB2vPDlkw4KgZKU6AJDnf1K/phU=
 github.com/bwmarrin/discordgo v0.19.0 h1:kMED/DB0NR1QhRcalb85w0Cu3Ep2OrGAqZH1R5awQiY=
 github.com/bwmarrin/discordgo v0.19.0/go.mod h1:O9S4p+ofTFwB02em7jkpkV8M3R0/PUVOwN61zSZ0r4Q=
 github.com/cosiner/argv v0.0.1 h1:2iAFN+sWPktbZ4tvxm33Ei8VY66FPCxdOxpncUGpAXE=
@@ -107,6 +109,8 @@ golang.org/x/sys v0.0.0-20180905080454-ebe1bf3edb33 h1:I6FyU15t786LL7oL/hn43zqTu
 golang.org/x/sys v0.0.0-20180905080454-ebe1bf3edb33/go.mod h1:STP8DvDyc/dI5b8T5hshtkjS+E42TnysNCUPdjciGhY=
 golang.org/x/sys v0.0.0-20181213200352-4d1cda033e06 h1:0oC8rFnE+74kEmuHZ46F6KHsMr5Gx2gUQPuNz28iQZM=
 golang.org/x/sys v0.0.0-20181213200352-4d1cda033e06/go.mod h1:STP8DvDyc/dI5b8T5hshtkjS+E42TnysNCUPdjciGhY=
+golang.org/x/sys v0.0.0-20181217223516-dcdaa6325bcb h1:zzdd4xkMwu/GRxhSUJaCPh4/jil9kAbsU7AUmXboO+A=
+golang.org/x/sys v0.0.0-20181217223516-dcdaa6325bcb/go.mod h1:STP8DvDyc/dI5b8T5hshtkjS+E42TnysNCUPdjciGhY=
 golang.org/x/tools v0.0.0-20180221164845-07fd8470d635/go.mod h1:n7NCudcB/nEzxVGmLbDWY5pfWTLqBcC2KZ6jyYvM4mQ=
 golang.org/x/tools v0.0.0-20180824175216-6c1c5e93cdc1/go.mod h1:n7NCudcB/nEzxVGmLbDWY5pfWTLqBcC2KZ6jyYvM4mQ=
 golang.org/x/tools v0.0.0-20181019005945-6adeb8aab2de/go.mod h1:n7NCudcB/nEzxVGmLbDWY5pfWTLqBcC2KZ6jyYvM4mQ=
@@ -116,6 +120,7 @@ golang.org/x/tools v0.0.0-20181201035826-d0ca3933b724/go.mod h1:n7NCudcB/nEzxVGm
 golang.org/x/tools v0.0.0-20181207195948-8634b1ecd393/go.mod h1:n7NCudcB/nEzxVGmLbDWY5pfWTLqBcC2KZ6jyYvM4mQ=
 golang.org/x/tools v0.0.0-20181214171254-3c39ce7b6105/go.mod h1:n7NCudcB/nEzxVGmLbDWY5pfWTLqBcC2KZ6jyYvM4mQ=
 golang.org/x/tools v0.0.0-20181217182337-728ed46ae025/go.mod h1:n7NCudcB/nEzxVGmLbDWY5pfWTLqBcC2KZ6jyYvM4mQ=
+golang.org/x/tools v0.0.0-20181218020041-13ba8ad772df/go.mod h1:n7NCudcB/nEzxVGmLbDWY5pfWTLqBcC2KZ6jyYvM4mQ=
 gopkg.in/alecthomas/kingpin.v3-unstable v3.0.0-20180810215634-df19058c872c h1:vTxShRUnK60yd8DZU+f95p1zSLj814+5CuEh7NjF2/Y=
 gopkg.in/alecthomas/kingpin.v3-unstable v3.0.0-20180810215634-df19058c872c/go.mod h1:3HH7i1SgMqlzxCcBmUHW657sD4Kvv9sC3HpL3YukzwA=
 gopkg.in/check.v1 v0.0.0-20161208181325-20d25e280405/go.mod h1:Co6ibVJAznAaIkqp8huTwlJQCZ016jof/cbN4VW5Yz0=
