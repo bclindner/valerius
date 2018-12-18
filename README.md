@@ -68,11 +68,13 @@ It's best to learn by example here. This is an example config similar to the one
         ],
         "method": "GET",
         "response": [
-          "XKCD %v: %v %v",
+          "XKCD %v: %v\nAlt text: %v\n%v",
           "num",
           "safe_title",
+          "alt",
           "img"
-        ]
+        ],
+        "errorMessage": "Couldn't find that one, sorry!"
       }
     },
     {
@@ -110,6 +112,14 @@ It's best to learn by example here. This is an example config similar to the one
         "prefix": "!iasip",
         "fontpath": "./textile.ttf",
         "quality": 100
+      }
+    },
+    {
+      "name": "CommandReloader",
+      "type": "reload",
+      "userwhitelist": ["82984152671985664"],
+      "options": {
+        "trigger": "!reload"
       }
     }
   ]
