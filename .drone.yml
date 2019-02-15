@@ -18,21 +18,19 @@ steps:
   commands:
     - mkdir -p dist
     - GO111MODULE=on go mod vendor
-    - export GOFLAGS=-mod=vendor
-    # Linux ARM (for RPi)
-    - GOARCH=arm GOOS=linux go build -o dist/valerius-linux-arm-$DRONE_TAG
-    # Linux 386
-    - GOARCH=386 GOOS=linux go build -o dist/valerius-linux-386-$DRONE_TAG
-    # Linux amd64
-    - GOARCH=amd64 GOOS=linux go build -o dist/valerius-linux-amd64-$DRONE_TAG
-    # Windows 386
-    - GOARCH=386 GOOS=windows go build -o dist/valerius-windows-386-$DRONE_TAG.exe
-    # Windows amd64
-    - GOARCH=amd64 GOOS=windows go build -o dist/valerius-windows-amd64-$DRONE_TAG.exe
-    # macOS 386
-    - GOARCH=386 GOOS=darwin go build -o dist/valerius-darwin-386-$DRONE_TAG
-    # macOS amd64
-    - GOARCH=amd64 GOOS=darwin go build -o dist/valerius-darwin-amd64-$DRONE_TAG
+    - export GOFLAGS="-mod=vendor -ldflags=-s -ldflags=-w"
+    # Build all 386/amd64
+    - |
+      for goarch in 386 amd64
+      do
+        for goos in linux windows darwin
+        do
+          echo building $goos/$goarch...
+          GOARCH=$goarch GOOS=$goos go build -o dist/valerius-$goos-$goarch-$DRONE_TAG
+        done
+      done
+      echo building linux/arm...
+      GOARCH=arm GOOS=linux go build -o dist/valerius-linux-arm-$DRONE_TAG
 - name: publish
   image: plugins/github-release
   settings:
