@@ -1,4 +1,4 @@
-module gitlab.com/bclindner/valerius/v0.3
+module gitlab.com/bclindner/valerius/v0.7.1
 
 require (
 	github.com/bclindner/iasipgenerator v0.0.0-20181218024440-9e995f4ca2d0
