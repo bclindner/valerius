@@ -1,0 +1,43 @@
+---
+kind: pipeline
+name: build-arm
+
+# ARM build (for home Raspberry Pi CI)
+platform:
+  os: linux
+  arch: arm
+
+# Only start on tags
+trigger:
+  event:
+  - tag
+
+steps:
+- name: build
+  image: golang:latest
+  commands:
+    - mkdir -p dist
+    - GO111MODULE=on go mod vendor
+    - export GOFLAGS=-mod=vendor
+    # Linux ARM (for RPi)
+    - GOARCH=arm GOOS=linux go build -o dist/valerius-linux-arm-$DRONE_TAG
+    # Linux 386
+    - GOARCH=386 GOOS=linux go build -o dist/valerius-linux-386-$DRONE_TAG
+    # Linux amd64
+    - GOARCH=amd64 GOOS=linux go build -o dist/valerius-linux-amd64-$DRONE_TAG
+    # Windows 386
+    - GOARCH=386 GOOS=windows go build -o dist/valerius-windows-386-$DRONE_TAG.exe
+    # Windows amd64
+    - GOARCH=amd64 GOOS=windows go build -o dist/valerius-windows-amd64-$DRONE_TAG.exe
+    # macOS 386
+    - GOARCH=386 GOOS=darwin go build -o dist/valerius-darwin-386-$DRONE_TAG
+    # macOS amd64
+    - GOARCH=amd64 GOOS=darwin go build -o dist/valerius-darwin-amd64-$DRONE_TAG
+- name: publish
+  image: plugins/github-release
+  settings:
+    api_key:
+      from_secret: github_token
+    files: dist/*
+    checksum:
+    - sha256
