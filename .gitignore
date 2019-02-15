@@ -7,3 +7,4 @@ valerius_*
 vendor/
 v*.*
 bin/
+dist/
